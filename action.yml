@@ -1,0 +1,32 @@
+name: 'aliyun-oss-website-action'
+description: 'Deploy your website on aliyun OSS'
+author: 'Binwei Fang <fangbinwei@yeah.net>'
+branding:
+  icon: 'upload'
+  color: 'gray-dark'
+inputs:
+  folder:
+    description: 'Folder which contains the website files'
+    required: true
+  accessKeyId:
+    description: 'Aliyun OSS accessKeyId.'
+    required: true
+  accessKeySecret:
+    description: 'Aliyun OSS accessKeySecret.'
+    required: true
+  bucket:
+    description: 'Aliyun OSS bucket instance.'
+    required: true
+  endpoint:
+    description: 'OSS region domain'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    ACCESS_KEY_ID: ${{ inputs.accessKeyId }}
+    ACCESS_KEY_SECRET: ${{ inputs.accessKeySecret }}
+    BUCKET: ${{ inputs.bucket }}
+    ENDPOINT: ${{ inputs.endpoint }}
+    FOLDER: ${{ inputs.folder }}
+    
