@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: fangbinwei/aliyun-oss-website-action@master
+    - uses: actions/checkout@v1
+    - uses: fangbinwei/aliyun-oss-website-action@3993bfd
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
