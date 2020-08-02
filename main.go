@@ -9,14 +9,19 @@ import (
 )
 
 func main() {
+	defer utils.TimeCost()()
 	endpoint := os.Getenv("ENDPOINT")
 	accessKeyID := os.Getenv("ACCESS_KEY_ID")
 	accessKeySecret := os.Getenv("ACCESS_KEY_SECRET")
 	folder := os.Getenv("FOLDER")
-	bucketName:= os.Getenv("BUCKET")
-	fmt.Println(endpoint, bucketName, folder)
+	bucketName := os.Getenv("BUCKET")
 
-	defer utils.TimeCost()()
+	currentPath, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("endpoint: %s\n bucketName: %s\n folder: %s\n current directory: %s\n", endpoint, bucketName, folder, currentPath)
+
 	client, err := oss.New(endpoint, accessKeyID, accessKeySecret)
 	if err != nil {
 		utils.HandleError(err)
