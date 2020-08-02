@@ -9,14 +9,30 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+          matrix:
+            node-version: [14.x]
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: fangbinwei/aliyun-oss-website-action@3993bfd
+      # load repo to /github/workspace
+    - uses: actions/checkout@v2
+      with:
+          repository: fangbinwei/blog
+          fetch-depth: 0
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install yarn -g
+    - run: yarn install
+    - run: yarn docs:build
+    - name: upload files to OSS
+      uses: fangbinwei/aliyun-oss-website-action@3993bfd
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
           bucket: "fangbinwei-blog"
           endpoint: "oss-cn-shanghai.aliyuncs.com"
-          folder: "example/"
+          # folder in /github/workspace
+          folder: ".vuepress/dist"
 
