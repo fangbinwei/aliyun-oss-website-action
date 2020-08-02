@@ -3,16 +3,23 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/aliyun-oss-website-action/utils"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 func main() {
-	client, err := oss.New("", "", "")
+	endpoint := os.Getenv("ENDPOINT")
+	accessKeyID := os.Getenv("ACCESS_KEY_ID")
+	accessKeySecret := os.Getenv("ACCESS_KEY_SECRET")
+	folder := os.Getenv("FOLDER")
+	bucketName:= os.Getenv("BUCKET")
+	fmt.Println(endpoint, bucketName, folder)
+
+	defer utils.TimeCost()()
+	client, err := oss.New(endpoint, accessKeyID, accessKeySecret)
 	if err != nil {
-		HandleError(err)
+		utils.HandleError(err)
 	}
 
 	// bEnable := true
@@ -26,25 +33,19 @@ func main() {
 	// }
 
 	records := make(chan utils.FileInfoType)
-	utils.WalkDir("dist", records)
+	utils.WalkDir(folder, records)
 
-	bucket, err := client.Bucket("fangbinwei-blog")
+	bucket, err := client.Bucket(bucketName)
 	if err != nil {
-		HandleError(err)
+		utils.HandleError(err)
 	}
-	for item := range records {
-		fPath := item.Path
-		objectKey := strings.TrimPrefix(item.PathOSS, "dist/")
-		err = bucket.PutObjectFromFile(objectKey, fPath)
-		if err != nil {
-			fmt.Println("occurred error:", err)
-		}
-		fmt.Printf("objectKey: %s\n filePath: %s\n", objectKey, fPath)
-	}
-}
 
-// HandleError is error handling method, print error and exit
-func HandleError(err error) {
-	fmt.Println("occurred error:", err)
-	os.Exit(1)
+	errs := utils.UploadFiles(folder, bucket, records)
+	if errs != nil {
+		fmt.Println("errors:")
+		for i, err := range errs {
+			fmt.Printf("%d\n%v\n", i, err)
+		}
+	}
+
 }
