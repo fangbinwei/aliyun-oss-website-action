@@ -1,0 +1,21 @@
+name: deploy test
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: fangbinwei/aliyun-oss-website-action
+      with:
+          accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
+          accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+          bucket: "fangbinwei-blog"
+          endpoint: "oss-cn-shanghai.aliyuncs.com"
+          folder: "example/"
+
