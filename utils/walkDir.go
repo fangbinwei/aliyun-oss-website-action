@@ -34,12 +34,13 @@ func WalkDir(root string, fileInfos chan FileInfoType) {
 func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 	defer sw.Done()
 	for _, entry := range dirents(dir) {
+		entryName := entry.Name()
 		if entry.IsDir() {
 			sw.Add(1)
-			subdir := filepath.Join(dir, entry.Name())
+			subdir := filepath.Join(dir, entryName)
 			go walkDir(subdir, sw, fileInfos)
 		} else {
-			p := filepath.Join(dir, entry.Name())
+			p := filepath.Join(dir, entryName)
 			fileInfos <- FileInfoType{
 				Dir:     dir,
 				Path:    p,
