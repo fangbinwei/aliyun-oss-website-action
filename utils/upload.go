@@ -9,8 +9,8 @@ import (
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 
-// UploadFiles upload files to OSS
-func UploadFiles(root string, bucket *oss.Bucket, records chan FileInfoType) []error {
+// UploadObjects upload files to OSS
+func UploadObjects(root string, bucket *oss.Bucket, records chan FileInfoType) []error {
 	if !strings.HasSuffix(root, "/") {
 		root += "/"
 	}
@@ -42,7 +42,7 @@ func UploadFiles(root string, bucket *oss.Bucket, records chan FileInfoType) []e
 	return nil
 }
 
-func getHTTPHeader (item *FileInfoType) []oss.Option {
+func getHTTPHeader(item *FileInfoType) []oss.Option {
 	return []oss.Option{
 		getCacheControlOption(item.Info.Name()),
 	}

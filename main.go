@@ -53,7 +53,7 @@ func main() {
 
 	fmt.Println("----upload info-----")
 
-	errs := utils.UploadFiles(folder, bucket, records)
+	errs := utils.UploadObjects(folder, bucket, records)
 	if errs != nil {
 		fmt.Println("errors:")
 		for i, err := range errs {
