@@ -13,6 +13,8 @@ var (
 	AccessKeySecret string
 	Folder          string
 	BucketName      string
+	IndexPage       string
+	NotFoundPage    string
 )
 
 func init() {
@@ -24,9 +26,14 @@ func init() {
 	AccessKeySecret = os.Getenv("ACCESS_KEY_SECRET")
 	Folder = os.Getenv("FOLDER")
 	BucketName = os.Getenv("BUCKET")
+	IndexPage = os.Getenv("IndexPage")
+	NotFoundPage = os.Getenv("NotFoundPage")
+
 	currentPath, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\ncurrent directory: %s\n", Endpoint, BucketName, Folder, currentPath)
+	fmt.Printf("current directory: %s\n", currentPath)
+	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\n",
+		Endpoint, BucketName, Folder, IndexPage, NotFoundPage)
 }

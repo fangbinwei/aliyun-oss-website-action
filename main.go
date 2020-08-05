@@ -19,8 +19,8 @@ func main() {
 	bEnable := true
 	supportSubDirType := 0
 	wxml := oss.WebsiteXML{}
-	wxml.IndexDocument.Suffix = "index.html"
-	wxml.ErrorDocument.Key = "404.html"
+	wxml.IndexDocument.Suffix = config.IndexPage
+	wxml.ErrorDocument.Key = config.NotFoundPage
 	wxml.IndexDocument.SupportSubDir = &bEnable
 	wxml.IndexDocument.Type = &supportSubDirType
 

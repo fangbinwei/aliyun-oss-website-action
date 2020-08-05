@@ -20,6 +20,14 @@ inputs:
   endpoint:
     description: 'OSS region domain'
     required: true
+  indexPage:
+    description: 'index page'
+    required: false
+    default: 'index.html'
+  notFoundPage:
+    description: 'not found page'
+    required: false
+    default: '404.html'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -29,4 +37,6 @@ runs:
     BUCKET: ${{ inputs.bucket }}
     ENDPOINT: ${{ inputs.endpoint }}
     FOLDER: ${{ inputs.folder }}
+    IndexPage: ${{ inputs.indexPage }}
+    NotFoundPage: ${{ inputs.notFoundPage }}
     
