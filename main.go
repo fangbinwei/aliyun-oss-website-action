@@ -2,30 +2,16 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/aliyun-oss-website-action/utils"
+	"github.com/aliyun-oss-website-action/config"
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	defer utils.TimeCost()()
-	godotenv.Load(".env.local")
 
-	endpoint := os.Getenv("ENDPOINT")
-	accessKeyID := os.Getenv("ACCESS_KEY_ID")
-	accessKeySecret := os.Getenv("ACCESS_KEY_SECRET")
-	folder := os.Getenv("FOLDER")
-	bucketName := os.Getenv("BUCKET")
-
-	currentPath, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\ncurrent directory: %s\n", endpoint, bucketName, folder, currentPath)
-
-	client, err := oss.New(endpoint, accessKeyID, accessKeySecret)
+	client, err := oss.New(config.Endpoint, config.AccessKeyID, config.AccessKeySecret)
 	if err != nil {
 		utils.HandleError(err)
 	}
@@ -38,27 +24,25 @@ func main() {
 	wxml.IndexDocument.SupportSubDir = &bEnable
 	wxml.IndexDocument.Type = &supportSubDirType
 
-	err = client.SetBucketWebsiteDetail(bucketName, wxml)
+	err = client.SetBucketWebsiteDetail(config.BucketName, wxml)
 	if err != nil {
 		fmt.Printf("Failed to set website detail: %v", err)
 	}
 
-	records := make(chan utils.FileInfoType)
-	utils.WalkDir(folder, records)
-
-	bucket, err := client.Bucket(bucketName)
+	bucket, err := client.Bucket(config.BucketName)
 	if err != nil {
 		utils.HandleError(err)
 	}
 
-	fmt.Println("----upload info-----")
+	fmt.Println("---- delete start ----")
+	deleteErrs := utils.DeleteObjects(bucket)
+	utils.LogErrors(deleteErrs)
+	fmt.Println("---- delete end ----")
 
-	errs := utils.UploadObjects(folder, bucket, records)
-	if errs != nil {
-		fmt.Println("errors:")
-		for i, err := range errs {
-			fmt.Printf("%d\n%v\n", i, err)
-		}
-	}
+	records := utils.WalkDir(config.Folder)
 
+	fmt.Println("---- upload start ----")
+	uploadErrs := utils.UploadObjects(config.Folder, bucket, records)
+	utils.LogErrors(uploadErrs)
+	fmt.Println("---- upload end ----")
 }

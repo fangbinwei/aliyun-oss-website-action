@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+var sema = make(chan struct{}, 20)
+
 // FileInfoType is a type which contains dir and os.FileInfo
 type FileInfoType struct {
 	Dir     string
@@ -19,7 +21,8 @@ type FileInfoType struct {
 }
 
 // WalkDir get sub files of target dir
-func WalkDir(root string, fileInfos chan FileInfoType) {
+func WalkDir(root string) <-chan FileInfoType {
+	fileInfos := make(chan FileInfoType, 100)
 	var sw sync.WaitGroup
 	sw.Add(1)
 	go func() {
@@ -29,6 +32,7 @@ func WalkDir(root string, fileInfos chan FileInfoType) {
 		sw.Wait()
 		close(fileInfos)
 	}()
+	return fileInfos
 }
 
 func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
@@ -50,8 +54,6 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 		}
 	}
 }
-
-var sema = make(chan struct{}, 20)
 
 func dirents(dir string) []os.FileInfo {
 	sema <- struct{}{}        // acquire token

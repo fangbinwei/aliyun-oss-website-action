@@ -10,7 +10,7 @@ import (
 )
 
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records chan FileInfoType) []error {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan FileInfoType) []error {
 	if !strings.HasSuffix(root, "/") {
 		root += "/"
 	}
@@ -28,7 +28,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records chan FileInfoType) [
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
 			<-tokens
 			if err != nil {
-				errs = append(errs, fmt.Errorf("objectKey: %s\nfilePath: %s\nerror: %v", objectKey, fPath, err))
+				errs = append(errs, fmt.Errorf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", objectKey, fPath, err))
 				return
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n", objectKey, fPath)
