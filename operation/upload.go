@@ -20,12 +20,12 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	for item := range records {
 		sw.Add(1)
 		var tokens = make(chan struct{}, 10)
-		go func(item *utils.FileInfoType) {
+		go func(item utils.FileInfoType) {
 			defer sw.Done()
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
 			tokens <- struct{}{}
-			options := getHTTPHeader(item)
+			options := getHTTPHeader(&item)
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
 			<-tokens
 			if err != nil {
@@ -34,7 +34,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n", objectKey, fPath)
 			fmt.Println()
-		}(&item)
+		}(item)
 	}
 	sw.Wait()
 	if len(errs) > 0 {
