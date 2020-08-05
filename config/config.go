@@ -4,8 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aliyun-oss-website-action/utils"
+	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 	"github.com/joho/godotenv"
 )
+
+// WebsiteOptions contains options for static website setting in OSS
+type WebsiteOptions = struct {
+	IndexPage    string
+	NotFoundPage string
+}
 
 var (
 	Endpoint        string
@@ -13,8 +21,9 @@ var (
 	AccessKeySecret string
 	Folder          string
 	BucketName      string
-	IndexPage       string
-	NotFoundPage    string
+	Client          *oss.Client
+	Bucket          *oss.Bucket
+	Website         *WebsiteOptions
 )
 
 func init() {
@@ -26,8 +35,10 @@ func init() {
 	AccessKeySecret = os.Getenv("ACCESS_KEY_SECRET")
 	Folder = os.Getenv("FOLDER")
 	BucketName = os.Getenv("BUCKET")
-	IndexPage = os.Getenv("IndexPage")
-	NotFoundPage = os.Getenv("NotFoundPage")
+	Website = &WebsiteOptions{
+		IndexPage:    os.Getenv("INDEX_PAGE"),
+		NotFoundPage: os.Getenv("NOT_FOUND_PAGE"),
+	}
 
 	currentPath, err := os.Getwd()
 	if err != nil {
@@ -35,5 +46,15 @@ func init() {
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
 	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\n",
-		Endpoint, BucketName, Folder, IndexPage, NotFoundPage)
+		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage)
+
+	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret)
+	if err != nil {
+		utils.HandleError(err)
+	}
+
+	Bucket, err = Client.Bucket(BucketName)
+	if err != nil {
+		utils.HandleError(err)
+	}
 }

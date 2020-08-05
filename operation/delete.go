@@ -1,9 +1,10 @@
-package utils
+package operation
 
 import (
 	"fmt"
 	"sync"
 
+	"github.com/aliyun-oss-website-action/utils"
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 
@@ -54,7 +55,7 @@ func listObjects(bucket *oss.Bucket, objKeyCollection chan<- string) {
 	for {
 		lor, err := bucket.ListObjects(oss.MaxKeys(maxKeys), marker)
 		if err != nil {
-			HandleError(err)
+			utils.HandleError(err)
 		}
 		for _, object := range lor.Objects {
 			objKeyCollection <- object.Key

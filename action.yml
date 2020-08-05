@@ -37,6 +37,6 @@ runs:
     BUCKET: ${{ inputs.bucket }}
     ENDPOINT: ${{ inputs.endpoint }}
     FOLDER: ${{ inputs.folder }}
-    IndexPage: ${{ inputs.indexPage }}
-    NotFoundPage: ${{ inputs.notFoundPage }}
+    INDEX_PAGE: ${{ inputs.indexPage }}
+    NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
     
