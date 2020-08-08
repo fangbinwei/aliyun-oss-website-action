@@ -1,5 +1,5 @@
 name: 'aliyun-oss-website-action'
-description: 'Deploy your website on aliyun OSS'
+description: 'Deploy your static website on aliyun OSS'
 author: 'Binwei Fang <fangbinwei@yeah.net>'
 branding:
   icon: 'upload'
@@ -23,7 +23,7 @@ inputs:
   cname:
     description: '`true` to identify the endpoint is your custom domain.'
     required: false
-    default: false
+    default: 'false'
   indexPage:
     description: 'index page'
     required: false
