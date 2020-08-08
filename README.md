@@ -1,4 +1,4 @@
-# aliyun-oss-website-action(WIP)
+# aliyun-oss-website-action
 
 deploy website on aliyun OSS(Alibaba Cloud OSS)
 
@@ -14,7 +14,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 
 ```yml
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@master
+      uses: fangbinwei/aliyun-oss-website-action@v1
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
@@ -80,7 +80,7 @@ jobs:
     # 打包文档命令
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@master
+      uses: fangbinwei/aliyun-oss-website-action@v1
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
