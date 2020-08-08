@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/aliyun-oss-website-action/config"
 	"github.com/aliyun-oss-website-action/utils"
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
@@ -52,15 +53,15 @@ func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 func getCacheControlOption(filename string) oss.Option {
 	var value string
 	if isHTML(filename) {
-		value = "no-cache"
+		value = config.HTMLCacheControl
 	} else if isImage(filename) {
 		// pic name may not contains hash, so use different strategy
 		// 10 days
-		value = "max-age=864000"
+		value = config.ImageCacheControl
 	} else {
 		// static assets like .js .css, use contentHash in file name, so html can update these files.
 		// 30 days
-		value = "max-age=2592000"
+		value = config.OtherCacheControl
 	}
 	return oss.CacheControl(value)
 }

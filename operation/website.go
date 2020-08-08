@@ -19,6 +19,6 @@ func SetStaticWebsiteConfig(client *oss.Client, o *config.WebsiteOptions) {
 
 	err := client.SetBucketWebsiteDetail(config.BucketName, wxml)
 	if err != nil {
-		fmt.Printf("Failed to set website detail: %v", err)
+		fmt.Printf("Failed to set website detail: %v\n", err)
 	}
 }

@@ -16,25 +16,33 @@ type WebsiteOptions = struct {
 }
 
 var (
-	Endpoint        string
-	AccessKeyID     string
-	AccessKeySecret string
-	Folder          string
-	BucketName      string
-	Client          *oss.Client
-	Bucket          *oss.Bucket
-	Website         *WebsiteOptions
+	Endpoint          string
+	AccessKeyID       string
+	AccessKeySecret   string
+	Folder            string
+	BucketName        string
+	IsCname           bool
+	HTMLCacheControl  string
+	ImageCacheControl string
+	OtherCacheControl string
+	Client            *oss.Client
+	Bucket            *oss.Bucket
+	Website           *WebsiteOptions
 )
 
 func init() {
-
+	godotenv.Load(".env")
 	godotenv.Load(".env.local")
 
 	Endpoint = os.Getenv("ENDPOINT")
+	IsCname = os.Getenv("CNAME") == "true"
 	AccessKeyID = os.Getenv("ACCESS_KEY_ID")
 	AccessKeySecret = os.Getenv("ACCESS_KEY_SECRET")
 	Folder = os.Getenv("FOLDER")
 	BucketName = os.Getenv("BUCKET")
+	HTMLCacheControl = os.Getenv("HTML_CACHE_CONTROL")
+	ImageCacheControl = os.Getenv("IMAGE_CACHE_CONTROL")
+	OtherCacheControl = os.Getenv("OTHER_CACHE_CONTROL")
 	Website = &WebsiteOptions{
 		IndexPage:    os.Getenv("INDEX_PAGE"),
 		NotFoundPage: os.Getenv("NOT_FOUND_PAGE"),
@@ -45,10 +53,10 @@ func init() {
 		fmt.Println(err)
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\n",
-		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage)
+	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\n",
+		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage, IsCname)
 
-	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret)
+	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret, oss.UseCname(IsCname))
 	if err != nil {
 		utils.HandleError(err)
 	}

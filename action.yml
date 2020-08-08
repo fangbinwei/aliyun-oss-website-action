@@ -20,6 +20,10 @@ inputs:
   endpoint:
     description: 'OSS region domain'
     required: true
+  cname:
+    description: '`true` to identify the endpoint is your custom domain.'
+    required: false
+    default: false
   indexPage:
     description: 'index page'
     required: false
@@ -28,6 +32,18 @@ inputs:
     description: 'not found page'
     required: false
     default: '404.html'
+  htmlCacheControl:
+    description: 'Cache-Control for HTML'
+    required: false
+    default: 'no-cache'
+  imageCacheControl:
+    description: 'Cache-Control for image'
+    required: false
+    default: 'max-age=864000'
+  otherCacheControl:
+    description: 'Cache-Control for other files'
+    required: false
+    default: 'max-age=2592000'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -36,7 +52,11 @@ runs:
     ACCESS_KEY_SECRET: ${{ inputs.accessKeySecret }}
     BUCKET: ${{ inputs.bucket }}
     ENDPOINT: ${{ inputs.endpoint }}
+    CNAME: ${{ inputs.cname }}
     FOLDER: ${{ inputs.folder }}
     INDEX_PAGE: ${{ inputs.indexPage }}
     NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
+    HTML_CACHE_CONTROL: ${{ inputs.htmlCacheControl }}
+    IMAGE_CACHE_CONTROL: ${{ inputs.imageCacheControl }}
+    OTHER_CACHE_CONTROL: ${{ inputs.otherCacheControl }}
     
