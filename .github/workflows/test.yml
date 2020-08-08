@@ -43,8 +43,9 @@ jobs:
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
-          bucket: "fangbinwei-blog"
-          endpoint: "oss-cn-shanghai.aliyuncs.com"
+          bucket: fangbinwei-blog
+          endpoint: b.fangbinwei.cn
+          cname: true
           # folder in /github/workspace
-          folder: ".vuepress/dist"
+          folder: .vuepress/dist
 
