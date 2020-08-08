@@ -55,6 +55,8 @@ func init() {
 	fmt.Printf("current directory: %s\n", currentPath)
 	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\n",
 		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage, IsCname)
+	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\n",
+		HTMLCacheControl, ImageCacheControl, OtherCacheControl)
 
 	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret, oss.UseCname(IsCname))
 	if err != nil {
