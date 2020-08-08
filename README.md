@@ -18,10 +18,10 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
-          bucket: "your-bucket-name"
-          # like "oss-cn-shanghai.aliyuncs.com"
-          endpoint: "ali-oss-endpoint"
-          folder: "your-website-output-folder"
+          bucket: your-bucket-name
+          # e.g. "oss-cn-shanghai.aliyuncs.com", 也可以填写自定义域名(需要配置cname 为 true)
+          endpoint: ali-oss-endpoint
+          folder: your-website-output-folder
 ```
 ### 配置项
 - `accessKeyId`: **必填**
@@ -29,8 +29,12 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `endpoint`: **必填**
 - `folder`: **必填**, repo打包输出的资源文件夹
 - `bucket`: **必填**,部署网站的bucket, 用于存放网站的资源
+- `cname`: 默认`false`. 若`endpoint`填写自定义域名, 需设置为`true`
 - `indexPage`: 默认`index.html`.网站首页
 - `notFoundPage`: 默认`404.html`.网站404页面
+- `htmlCacheControl`: 默认`no-cache`
+- `imageCacheControl`: 默认`max-age=864000`
+- `otherCacheControl`: 默认`max-age=2592000`
 
 ## Cache-Control
 为上传的资源默认设置的`Cache-Control`如下
