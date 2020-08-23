@@ -30,8 +30,9 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `folder`: **必填**, repo打包输出的资源文件夹
 - `bucket`: **必填**,部署网站的bucket, 用于存放网站的资源
 - `cname`: 默认`false`. 若`endpoint`填写自定义域名, 需设置为`true`
-- `indexPage`: 默认`index.html`.网站首页
-- `notFoundPage`: 默认`404.html`.网站404页面
+- `indexPage`: 默认`index.html`.网站首页(用于[静态页面配置](#静态页面配置))
+- `notFoundPage`: 默认`404.html`.网站404页面(用于[静态页面配置](#静态页面配置))
+- `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
 - `htmlCacheControl`: 默认`no-cache`
 - `imageCacheControl`: 默认`max-age=864000`
 - `otherCacheControl`: 默认`max-age=2592000`
@@ -48,6 +49,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 默认的, action会将阿里云OSS的静态页面配置成如下
 ![2020-08-06-03-18-25](https://image.fangbinwei.cn/github/aliyun-oss-website-action/2020-08-06-03-18-25_05d556d8.png)
 
+若不需要action来设置, 可以配置`skipSetting`为`true`
 
 ## Demo
 ### 部署VuePress项目
@@ -89,6 +91,26 @@ jobs:
           folder: ".vuepress/dist"
 ```
 具体可以参考本项目的[workflow](.github/workflows/test.yml), npm/yarn配合`action/cache`加速依赖安装
+
+### Vue
+
+[see here](https://github.com/fangbinwei/oss-website-demo-spa-vue)
+
+```yml
+- name: upload files to OSS
+      uses: fangbinwei/aliyun-oss-website-action@v1
+      with:
+          accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
+          accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+          bucket: website-spa-vue-demo
+          endpoint: oss-spa-demo.fangbinwei.cn
+          cname: true
+          folder: dist
+          notFoundPage: index.html
+          htmlCacheControl: no-cache
+          imageCacheControl: max-age=864001
+          otherCacheControl: max-age=2592001
+```
 
 ### Hugo
 TODO
