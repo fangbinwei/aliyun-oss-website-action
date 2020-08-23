@@ -24,6 +24,10 @@ inputs:
     description: '`true` to identify the endpoint is your custom domain.'
     required: false
     default: 'false'
+  skipSetting:
+    description: '`true` to skip setting static pages related configuration. `indexPage`, `notFoundPage` will not be used.'
+    required: false
+    default: 'false'
   indexPage:
     description: 'index page'
     required: false
@@ -54,6 +58,7 @@ runs:
     ENDPOINT: ${{ inputs.endpoint }}
     CNAME: ${{ inputs.cname }}
     FOLDER: ${{ inputs.folder }}
+    SKIP_SETTING: ${{ inputs.skipSetting }}
     INDEX_PAGE: ${{ inputs.indexPage }}
     NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
     HTML_CACHE_CONTROL: ${{ inputs.htmlCacheControl }}

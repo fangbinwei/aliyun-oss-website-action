@@ -51,4 +51,5 @@ jobs:
           htmlCacheControl: no-cache
           imageCacheControl: max-age=864001
           otherCacheControl: max-age=2592001
+          skipSetting: true
 

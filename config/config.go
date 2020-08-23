@@ -27,6 +27,7 @@ var (
 	OtherCacheControl string
 	Client            *oss.Client
 	Bucket            *oss.Bucket
+	SkipSetting       bool
 	Website           *WebsiteOptions
 )
 
@@ -43,6 +44,7 @@ func init() {
 	HTMLCacheControl = os.Getenv("HTML_CACHE_CONTROL")
 	ImageCacheControl = os.Getenv("IMAGE_CACHE_CONTROL")
 	OtherCacheControl = os.Getenv("OTHER_CACHE_CONTROL")
+	SkipSetting = os.Getenv("SKIP_SETTING") == "true"
 	Website = &WebsiteOptions{
 		IndexPage:    os.Getenv("INDEX_PAGE"),
 		NotFoundPage: os.Getenv("NOT_FOUND_PAGE"),
@@ -53,8 +55,8 @@ func init() {
 		fmt.Println(err)
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\n",
-		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage, IsCname)
+	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
+		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage, IsCname, SkipSetting)
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\n",
 		HTMLCacheControl, ImageCacheControl, OtherCacheControl)
 

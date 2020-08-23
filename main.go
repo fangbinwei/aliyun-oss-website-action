@@ -11,7 +11,11 @@ import (
 func main() {
 	defer utils.TimeCost()()
 
-	operation.SetStaticWebsiteConfig(config.Client, config.Website)
+	if !config.SkipSetting {
+		operation.SetStaticWebsiteConfig(config.Client, config.Website)
+	} else {
+		fmt.Println("skip setting static pages related configuration")
+	}
 
 	fmt.Println("---- delete start ----")
 	deleteErrs := operation.DeleteObjects(config.Bucket)
