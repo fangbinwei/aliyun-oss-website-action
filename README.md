@@ -6,7 +6,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 
 ## 概览
 - 在阿里云OSS创建一个存放网站的bucket
-- 准备一个域名, 可能需要备案
+- 准备一个域名, 可能需要备案(bucket选择非大陆区域, 可以不备案, 但是如果CDN加速区域包括大陆, 仍然需要备案)
 - 在你的网站repo中, 配置github action, 当action触发, 会清除bucket中原有的文件, 上传网站repo生成的资源文件到bucket中
 - 通过阿里云OSS的CDN, 可以很方便地加速网站的访问, 支持HTTPS
 
