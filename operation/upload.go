@@ -17,6 +17,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 		root += "/"
 	}
 	var sw sync.WaitGroup
+	var mutex sync.Mutex
 	var errs []error
 	for item := range records {
 		sw.Add(1)
@@ -30,7 +31,9 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
 			<-tokens
 			if err != nil {
+				mutex.Lock()
 				errs = append(errs, fmt.Errorf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", objectKey, fPath, err))
+				mutex.Unlock()
 				return
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n", objectKey, fPath)

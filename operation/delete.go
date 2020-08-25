@@ -17,6 +17,7 @@ func DeleteObjects(bucket *oss.Bucket) []error {
 	go listObjects(bucket, objKeyCollection)
 
 	var sw sync.WaitGroup
+	var mutex sync.Mutex
 	tokens := make(chan struct{}, 10)
 	for k := range objKeyCollection {
 		sw.Add(1)
@@ -28,7 +29,9 @@ func DeleteObjects(bucket *oss.Bucket) []error {
 			tokens <- struct{}{}
 			err := delete(bucket, key)
 			if err != nil {
+				mutex.Lock()
 				errs = append(errs, fmt.Errorf("[FAILED] objectKey: %s\nDetail: %v", key, err))
+				mutex.Unlock()
 				return
 			}
 			fmt.Printf("objectKey: %s\n", key)
