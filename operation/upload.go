@@ -13,13 +13,15 @@ import (
 )
 
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType) []error {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType) ([]utils.FileInfoType, []error) {
 	if !strings.HasSuffix(root, "/") {
 		root += "/"
 	}
 	var sw sync.WaitGroup
-	var mutex sync.Mutex
+	var errorMutex sync.Mutex
+	var uploadedMutex sync.Mutex
 	var errs []error
+	uploaded := make([]utils.FileInfoType, 0, 20)
 	for item := range records {
 		sw.Add(1)
 		var tokens = make(chan struct{}, 10)
@@ -32,20 +34,23 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
 			<-tokens
 			if err != nil {
-				mutex.Lock()
+				errorMutex.Lock()
 				errs = append(errs, fmt.Errorf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", objectKey, fPath, err))
-				mutex.Unlock()
+				errorMutex.Unlock()
 				return
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n", objectKey, fPath)
 			fmt.Println()
+			uploadedMutex.Lock()
+			uploaded = append(uploaded, item)
+			uploadedMutex.Unlock()
 		}(item)
 	}
 	sw.Wait()
 	if len(errs) > 0 {
-		return errs
+		return uploaded, errs
 	}
-	return nil
+	return uploaded, nil
 }
 
 func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
@@ -56,9 +61,9 @@ func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 
 func getCacheControlOption(filename string) oss.Option {
 	var value string
-	if isHTML(filename) {
+	if IsHTML(filename) {
 		value = config.HTMLCacheControl
-	} else if isImage(filename) {
+	} else if IsImage(filename) {
 		// pic name may not contains hash, so use different strategy
 		// 10 days
 		value = config.ImageCacheControl
@@ -70,11 +75,13 @@ func getCacheControlOption(filename string) oss.Option {
 	return oss.CacheControl(value)
 }
 
-func isHTML(filename string) bool {
+// IsHTML is used to determine if a file is HTML
+func IsHTML(filename string) bool {
 	return strings.HasSuffix(strings.ToLower(filename), ".html")
 }
 
-func isImage(filename string) bool {
+// IsImage is used to determine if a file is image
+func IsImage(filename string) bool {
 	imageExts := []string{
 		".png",
 		".jpg",
