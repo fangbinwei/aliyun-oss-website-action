@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 	"sync"
 )
 
@@ -48,7 +46,7 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 			fileInfos <- FileInfoType{
 				Dir:     dir,
 				Path:    p,
-				PathOSS: path.Join(strings.Split(p, string(filepath.Separator))...),
+				PathOSS: filepath.ToSlash(p),
 				Info:    entry,
 			}
 		}
