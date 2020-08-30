@@ -36,6 +36,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `htmlCacheControl`: 默认`no-cache`
 - `imageCacheControl`: 默认`max-age=864000`
 - `otherCacheControl`: 默认`max-age=2592000`
+- `exclude`: 不上传`folder`下的某些文件/文件夹
 
 ## Cache-Control
 为上传的资源默认设置的`Cache-Control`如下
@@ -50,6 +51,33 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 ![2020-08-06-03-18-25](https://image.fangbinwei.cn/github/aliyun-oss-website-action/2020-08-06-03-18-25_05d556d8.png)
 
 若不需要action来设置, 可以配置`skipSetting`为`true`
+
+## exclude
+如果`folder`下的某些文件不需要上传
+
+
+```yml
+    - name: exclude some files
+      uses: fangbinwei/aliyun-oss-website-action@v1
+      with:
+        folder: dist
+        exclude: |
+          tmp.txt
+          tmp/
+          tmp2/*.txt
+          tmp2/*/*.txt
+      # match dist/tmp.txt
+      # match dist/tmp/
+      # match dist/tmp2/a.txt
+      # match dist/tmp2/a/b.txt not match dist/tmp2/tmp3/b.txt
+```
+> 不支持`**`
+
+或者
+```yml
+- name: Clean files before upload
+  run: rm -f dist/tmp.txt
+```
 
 ## Demo
 ### 部署VuePress项目
