@@ -21,6 +21,7 @@ var (
 	AccessKeyID       string
 	AccessKeySecret   string
 	Folder            string
+	Exclude           []string
 	BucketName        string
 	IsCname           bool
 	HTMLCacheControl  string
@@ -33,14 +34,15 @@ var (
 )
 
 func init() {
-	godotenv.Load(".env", "../.env")
-	godotenv.Load(".env.local", "../.env.local")
+	godotenv.Load(".env")
+	godotenv.Load(".env.local")
 
 	Endpoint = os.Getenv("ENDPOINT")
 	IsCname = os.Getenv("CNAME") == "true"
 	AccessKeyID = os.Getenv("ACCESS_KEY_ID")
 	AccessKeySecret = os.Getenv("ACCESS_KEY_SECRET")
 	Folder = os.Getenv("FOLDER")
+	Exclude = utils.GetActionInputAsSlice(os.Getenv("EXCLUDE"))
 	BucketName = os.Getenv("BUCKET")
 	HTMLCacheControl = os.Getenv("HTML_CACHE_CONTROL")
 	ImageCacheControl = os.Getenv("IMAGE_CACHE_CONTROL")
@@ -56,8 +58,8 @@ func init() {
 		fmt.Println(err)
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
-		Endpoint, BucketName, Folder, Website.IndexPage, Website.NotFoundPage, IsCname, SkipSetting)
+	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
+		Endpoint, BucketName, Folder, Exclude, Website.IndexPage, Website.NotFoundPage, IsCname, SkipSetting)
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\n",
 		HTMLCacheControl, ImageCacheControl, OtherCacheControl)
 

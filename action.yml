@@ -8,6 +8,9 @@ inputs:
   folder:
     description: 'Folder which contains the website files'
     required: true
+  exclude:
+    description: 'Exclude file from the folder'
+    required: false
   accessKeyId:
     description: 'Aliyun OSS accessKeyId.'
     required: true
@@ -58,6 +61,7 @@ runs:
     ENDPOINT: ${{ inputs.endpoint }}
     CNAME: ${{ inputs.cname }}
     FOLDER: ${{ inputs.folder }}
+    EXCLUDE: ${{ inputs.exclude }}
     SKIP_SETTING: ${{ inputs.skipSetting }}
     INDEX_PAGE: ${{ inputs.indexPage }}
     NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}

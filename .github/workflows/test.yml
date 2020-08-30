@@ -39,7 +39,7 @@ jobs:
     - run: yarn install
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@master
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
@@ -52,4 +52,10 @@ jobs:
           imageCacheControl: max-age=864001
           otherCacheControl: max-age=2592001
           skipSetting: false
+          # not support recursive pattern **
+          exclude: |
+            CNAME
+            demo1/
+            demo2/*.md
+            demo2/*/*.md
 

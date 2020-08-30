@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,6 +19,8 @@ func TestMain(t *testing.T) {
 
 	records := utils.WalkDir(config.Folder)
 
+	// overwrite, since dotenv doesn't support multiline
+	config.Exclude = []string{"exclude.txt", "exclude/"}
 	fmt.Println("---- upload start ----")
 	uploaded, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records)
 	assert.Equal(len(uploadErrs), 0, uploadErrs)
@@ -26,6 +29,11 @@ func TestMain(t *testing.T) {
 	assert.NoError(err)
 
 	assert.Equal(len(uploaded), len(lor.Objects))
+
+	// test exclude
+	lor, err = config.Bucket.ListObjects(oss.Prefix("exclude"))
+	assert.NoError(err)
+	assert.Empty(lor.Objects)
 
 	// test cache-control
 	prefix := config.Folder

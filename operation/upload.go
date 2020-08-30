@@ -28,6 +28,9 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			defer sw.Done()
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
+			if shouldExclude(objectKey) {
+				return
+			}
 			tokens <- struct{}{}
 			options := getHTTPHeader(&item)
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
@@ -38,8 +41,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 				errorMutex.Unlock()
 				return
 			}
-			fmt.Printf("objectKey: %s\nfilePath: %s\n", objectKey, fPath)
-			fmt.Println()
+			fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
 			uploadedMutex.Lock()
 			uploaded = append(uploaded, item)
 			uploadedMutex.Unlock()
@@ -72,4 +74,12 @@ func getCacheControlOption(filename string) oss.Option {
 		value = config.OtherCacheControl
 	}
 	return oss.CacheControl(value)
+}
+
+func shouldExclude(ossPath string) bool {
+	if utils.Match(config.Exclude, ossPath) {
+		fmt.Printf("skip to upload objectKey: %s\n\n", ossPath)
+		return true
+	}
+	return false
 }
