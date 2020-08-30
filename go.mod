@@ -1,4 +1,4 @@
-module github.com/aliyun-oss-website-action
+module aliyun-oss-website-action
 
 go 1.13
 

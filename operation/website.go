@@ -3,7 +3,8 @@ package operation
 import (
 	"fmt"
 
-	"github.com/aliyun-oss-website-action/config"
+	"aliyun-oss-website-action/config"
+
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 

@@ -6,8 +6,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aliyun-oss-website-action/config"
-	"github.com/aliyun-oss-website-action/utils"
+	"aliyun-oss-website-action/config"
+	"aliyun-oss-website-action/utils"
+
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 

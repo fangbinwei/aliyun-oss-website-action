@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/aliyun-oss-website-action/utils"
+	"aliyun-oss-website-action/utils"
+
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 

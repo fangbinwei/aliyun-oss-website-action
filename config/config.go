@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aliyun-oss-website-action/utils"
+	"aliyun-oss-website-action/utils"
+
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 	"github.com/joho/godotenv"
 )
@@ -32,8 +33,8 @@ var (
 )
 
 func init() {
-	godotenv.Load(".env")
-	godotenv.Load(".env.local")
+	godotenv.Load(".env", "../.env")
+	godotenv.Load(".env.local", "../.env.local")
 
 	Endpoint = os.Getenv("ENDPOINT")
 	IsCname = os.Getenv("CNAME") == "true"

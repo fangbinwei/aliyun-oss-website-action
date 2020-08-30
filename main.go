@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/aliyun-oss-website-action/config"
-	"github.com/aliyun-oss-website-action/operation"
-	"github.com/aliyun-oss-website-action/utils"
+	"aliyun-oss-website-action/config"
+	"aliyun-oss-website-action/operation"
+	"aliyun-oss-website-action/utils"
 )
 
 func main() {
