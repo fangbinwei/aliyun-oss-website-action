@@ -2,7 +2,6 @@ package operation
 
 import (
 	"fmt"
-	"path"
 	"strings"
 	"sync"
 
@@ -61,9 +60,9 @@ func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 
 func getCacheControlOption(filename string) oss.Option {
 	var value string
-	if IsHTML(filename) {
+	if utils.IsHTML(filename) {
 		value = config.HTMLCacheControl
-	} else if IsImage(filename) {
+	} else if utils.IsImage(filename) {
 		// pic name may not contains hash, so use different strategy
 		// 10 days
 		value = config.ImageCacheControl
@@ -73,33 +72,4 @@ func getCacheControlOption(filename string) oss.Option {
 		value = config.OtherCacheControl
 	}
 	return oss.CacheControl(value)
-}
-
-// IsHTML is used to determine if a file is HTML
-func IsHTML(filename string) bool {
-	return strings.HasSuffix(strings.ToLower(filename), ".html")
-}
-
-// IsImage is used to determine if a file is image
-func IsImage(filename string) bool {
-	imageExts := []string{
-		".png",
-		".jpg",
-		".jpeg",
-		".webp",
-		".gif",
-		".bmp",
-		".tiff",
-		".ico",
-		".svg",
-	}
-	return func() bool {
-		ext := path.Ext(filename)
-		for _, e := range imageExts {
-			if e == ext {
-				return true
-			}
-		}
-		return false
-	}()
 }

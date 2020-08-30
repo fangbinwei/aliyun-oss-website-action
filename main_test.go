@@ -36,9 +36,9 @@ func TestMain(t *testing.T) {
 		props, err := config.Bucket.GetObjectDetailedMeta(strings.TrimPrefix(u.PathOSS, prefix))
 		assert.NoError(err)
 		cacheControl := props.Get("Cache-Control")
-		if operation.IsImage(u.PathOSS) {
+		if utils.IsImage(u.PathOSS) {
 			assert.Equal(cacheControl, config.ImageCacheControl)
-		} else if operation.IsHTML(u.PathOSS) {
+		} else if utils.IsHTML(u.PathOSS) {
 			assert.Equal(cacheControl, config.HTMLCacheControl)
 		} else {
 			assert.Equal(cacheControl, config.OtherCacheControl)
