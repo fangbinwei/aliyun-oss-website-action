@@ -78,7 +78,7 @@ func getCacheControlOption(filename string) oss.Option {
 
 func shouldExclude(ossPath string) bool {
 	if utils.Match(config.Exclude, ossPath) {
-		fmt.Printf("skip to upload objectKey: %s\n\n", ossPath)
+		fmt.Printf("skip uploading objectKey: %s\n\n", ossPath)
 		return true
 	}
 	return false
