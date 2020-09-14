@@ -14,6 +14,10 @@ import (
 
 func TestMain(t *testing.T) {
 	assert := assert.New(t)
+
+	err := operation.SetStaticWebsiteConfig(config.Client, config.Website)
+	assert.NoError(err)
+
 	errs := operation.DeleteObjects(config.Bucket)
 	assert.Equal(len(errs), 0)
 
@@ -41,6 +45,8 @@ func TestMain(t *testing.T) {
 		prefix += "/"
 	}
 	for _, u := range uploaded {
+		// 如果自定义域名解析到了cdn, 这个接口会报错, 但是上面的测试流程正常
+		// 避开方法: env中endpoint使用bucket的endpoint或者bucket域名, 而不是自定义域名
 		props, err := config.Bucket.GetObjectDetailedMeta(strings.TrimPrefix(u.PathOSS, prefix))
 		assert.NoError(err)
 		cacheControl := props.Get("Cache-Control")
