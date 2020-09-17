@@ -29,7 +29,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `endpoint`: **必填**
 - `folder`: **必填**, repo打包输出的资源文件夹
 - `bucket`: **必填**,部署网站的bucket, 用于存放网站的资源
-- `cname`: 默认`false`. 若`endpoint`填写自定义域名, 需设置为`true`
+- `cname`: 默认`false`. 若`endpoint`填写自定义域名/bucket域名, 需设置为`true`.(若自定义域名解析到了CDN, 则不要使用该配置)
 - `indexPage`: 默认`index.html`.网站首页(用于[静态页面配置](#静态页面配置))
 - `notFoundPage`: 默认`404.html`.网站404页面(用于[静态页面配置](#静态页面配置))
 - `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
