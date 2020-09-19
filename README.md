@@ -26,10 +26,9 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 ### 配置项
 - `accessKeyId`: **必填**
 - `accessKeySecret`: **必填**
-- `endpoint`: **必填**
+- `endpoint`: **必填**, 支持指定protocol, 例如`https://example.org`或者`http://example.org`
 - `folder`: **必填**, repo打包输出的资源文件夹
 - `bucket`: **必填**,部署网站的bucket, 用于存放网站的资源
-- `cname`: 默认`false`. 若`endpoint`填写自定义域名/bucket域名, 需设置为`true`.(若自定义域名解析到了CDN, 则不要使用该配置)
 - `indexPage`: 默认`index.html`.网站首页(用于[静态页面配置](#静态页面配置))
 - `notFoundPage`: 默认`404.html`.网站404页面(用于[静态页面配置](#静态页面配置))
 - `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
@@ -37,6 +36,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `imageCacheControl`: 默认`max-age=864000`
 - `otherCacheControl`: 默认`max-age=2592000`
 - `exclude`: 不上传`folder`下的某些文件/文件夹
+- `cname`: 默认`false`. 若`endpoint`填写自定义域名/bucket域名, 需设置为`true`. (使用CDN的场景下, 不推荐使用自定义域名)
 
 ## Cache-Control
 为上传的资源默认设置的`Cache-Control`如下
@@ -144,3 +144,9 @@ jobs:
 TODO
 ### Hexo
 TODO
+
+## FAQ
+### `endpoint`自定义域名, 但是无法上传
+1. 如果`endpoint`的域名CNAME记录为阿里云CDN, CDN是否配置了http强制跳转https? 若配置了, 需要在`endpoint`中指定https, 即`endpoint`为`https://example.org`
+
+2. 如果`endpoint`的域名CNAME记录为阿里云CDN, 在CDN为加速范围为全球时有遇到过如下报错`The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.`, 则`endpoint`不能使用自定义域名, 使用OSS源站的endpoint.
