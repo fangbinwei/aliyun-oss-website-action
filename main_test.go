@@ -15,7 +15,7 @@ import (
 func TestMain(t *testing.T) {
 	assert := assert.New(t)
 
-	err := operation.SetStaticWebsiteConfig(config.Client, config.Website)
+	err := operation.SetStaticWebsiteConfig()
 	assert.NoError(err)
 
 	errs := operation.DeleteObjects(config.Bucket)

@@ -12,7 +12,7 @@ func main() {
 	defer utils.TimeCost()()
 
 	if !config.SkipSetting {
-		operation.SetStaticWebsiteConfig(config.Client, config.Website)
+		operation.SetStaticWebsiteConfig()
 	} else {
 		fmt.Println("skip setting static pages related configuration")
 	}
