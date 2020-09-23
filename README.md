@@ -19,7 +19,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
           bucket: your-bucket-name
-          # e.g. "oss-cn-shanghai.aliyuncs.com", 也可以填写自定义域名(需要配置cname 为 true)
+          # e.g. "oss-cn-shanghai.aliyuncs.com"
           endpoint: ali-oss-endpoint
           folder: your-website-output-folder
 ```
@@ -69,7 +69,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
       # match dist/tmp.txt
       # match dist/tmp/
       # match dist/tmp2/a.txt
-      # match dist/tmp2/a/b.txt not match dist/tmp2/tmp3/b.txt
+      # match dist/tmp2/a/b.txt, not match dist/tmp2/tmp3/a/b.txt
 ```
 > 不支持`**`
 
