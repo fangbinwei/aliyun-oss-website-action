@@ -79,6 +79,21 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
   run: rm -f dist/tmp.txt
 ```
 
+## Docker image
+直接使用已经build好的docker image
+```yml
+    - name: upload files to OSS
+      # 暂时只有latest的tag
+      uses: docker://fangbinwei/aliyun-oss-website-action
+      # 使用env而不是with, 参数可以见本项目的action.yml
+      env:
+          ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+          ACCESS_KEY_SECRET: ${{ secrets.ACCESS_KEY_SECRET }}
+          BUCKET: your-bucket-name
+          ENDPOINT: ali-oss-endpoint
+          FOLDER: your-website-output-folder
+```
+
 ## Demo
 ### 部署VuePress项目
 
