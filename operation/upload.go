@@ -2,6 +2,7 @@ package operation
 
 import (
 	"fmt"
+	"path"
 	"strings"
 	"sync"
 
@@ -13,10 +14,8 @@ import (
 
 // UploadObjects upload files to OSS
 func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType) ([]utils.FileInfoType, []error) {
-	root = strings.TrimPrefix(root, "./")
-	if !strings.HasSuffix(root, "/") {
-		root += "/"
-	}
+	root = path.Clean(root) + "/"
+
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex

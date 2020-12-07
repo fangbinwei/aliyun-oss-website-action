@@ -5,6 +5,7 @@ import (
 	"aliyun-oss-website-action/operation"
 	"aliyun-oss-website-action/utils"
 	"fmt"
+	"path"
 	"strings"
 	"testing"
 
@@ -40,10 +41,8 @@ func TestMain(t *testing.T) {
 	assert.Empty(lor.Objects)
 
 	// test cache-control
-	prefix := config.Folder
-	if !strings.HasSuffix(prefix, "/") {
-		prefix += "/"
-	}
+	prefix := path.Clean(config.Folder) + "/"
+
 	for _, u := range uploaded {
 		// 如果自定义域名解析到了cdn, 这个接口会报错, 但是上面的测试流程正常
 		// 避开方法: env中endpoint使用bucket的endpoint或者bucket域名, 而不是自定义域名
