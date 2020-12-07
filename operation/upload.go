@@ -13,6 +13,7 @@ import (
 
 // UploadObjects upload files to OSS
 func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType) ([]utils.FileInfoType, []error) {
+	root = strings.TrimPrefix(root, "./")
 	if !strings.HasSuffix(root, "/") {
 		root += "/"
 	}
