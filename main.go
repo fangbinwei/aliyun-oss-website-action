@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"aliyun-oss-website-action/config"
 	"aliyun-oss-website-action/operation"
@@ -28,4 +29,9 @@ func main() {
 	_, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records)
 	utils.LogErrors(uploadErrs)
 	fmt.Println("---- upload end ----")
+
+	if len(uploadErrs) > 0 {
+		os.Exit(1)
+	}
+
 }
