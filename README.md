@@ -155,13 +155,17 @@ jobs:
           otherCacheControl: max-age=2592001
 ```
 
-### Hugo
-TODO
-### Hexo
-TODO
-
 ## FAQ
-### `endpoint`自定义域名, 但是无法上传
+
+### 配合CDN使用时, OSS更新后, CDN未刷新
+
+开启OSS提供的CDN缓存自动刷新功能, 将触发操作配置为`PutObject`, `DeleteObject`.
+
+![2020-12-13-23-51-28](https://image.fangbinwei.cn/github/aliyun-oss-website-action/2020-12-13-23-51-28_2c310155.png)
+
+![2020-12-13-23-51-55](https://image.fangbinwei.cn/github/aliyun-oss-website-action/2020-12-13-23-51-55_5fe79a54.png)
+
+### `endpoint`使用自定义域名, 但是无法上传
 1. 如果`endpoint`的域名CNAME记录为阿里云CDN, CDN是否配置了http强制跳转https? 若配置了, 需要在`endpoint`中指定https, 即`endpoint`为`https://example.org`
 
 2. 如果`endpoint`的域名CNAME记录为阿里云CDN, 在CDN为加速范围为全球时有遇到过如下报错`The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.`, 则`endpoint`不能使用自定义域名, 使用OSS源站的endpoint.
