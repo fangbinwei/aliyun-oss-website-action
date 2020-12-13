@@ -1,6 +1,8 @@
 name: deploy test
 
 on:
+# 支持手动触发
+  workflow_dispatch:
   push:
     branches:
       - master
