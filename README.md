@@ -83,8 +83,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 直接使用已经build好的docker image
 ```yml
     - name: upload files to OSS
-      # 暂时只有latest的tag
-      uses: docker://fangbinwei/aliyun-oss-website-action
+      uses: docker://fangbinwei/aliyun-oss-website-action:v1
       # 使用env而不是with, 参数可以见本项目的action.yml
       env:
           ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
