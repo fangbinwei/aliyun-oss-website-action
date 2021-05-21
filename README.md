@@ -19,10 +19,11 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
           bucket: your-bucket-name
-          # e.g. "oss-cn-shanghai.aliyuncs.com"
-          endpoint: ali-oss-endpoint
+          # use your own endpoint
+          endpoint: oss-cn-shanghai.aliyuncs.com
           folder: your-website-output-folder
 ```
+> 如果你使用了environment secret请[查看这里](#配置了environment-secret怎么不生效)
 ### 配置项
 - `accessKeyId`: **必填**
 - `accessKeySecret`: **必填**
@@ -168,3 +169,18 @@ jobs:
 1. 如果`endpoint`的域名CNAME记录为阿里云CDN, CDN是否配置了http强制跳转https? 若配置了, 需要在`endpoint`中指定https, 即`endpoint`为`https://example.org`
 
 2. 如果`endpoint`的域名CNAME记录为阿里云CDN, 在CDN为加速范围为全球时有遇到过如下报错`The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.`, 则`endpoint`不能使用自定义域名, 使用OSS源站的endpoint.
+
+### 配置了environment secret怎么不生效
+
+![2021-05-21-16-47-59](https://image.fangbinwei.cn/github/aliyun-oss-website-action/2021-05-21-16-47-59_affec2b0.png)
+
+如果使用environment secret, 那么需要如下类似的配置
+
+```diff
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
++    environment: your-environment-name
+
+```
