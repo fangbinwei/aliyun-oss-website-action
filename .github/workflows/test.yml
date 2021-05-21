@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - test-environment-secret
 
 jobs:
   build:
@@ -43,8 +43,8 @@ jobs:
     - name: upload files to OSS
       uses: fangbinwei/aliyun-oss-website-action@v1
       with:
-          accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
-          accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+          accessKeyId: ${{ secrets.KEY_ID }}
+          accessKeySecret: ${{ secrets.KEY_SECRET }}
           bucket: fangbinwei-blog
           endpoint: b.fangbinwei.cn
           cname: true
