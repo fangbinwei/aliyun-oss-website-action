@@ -23,7 +23,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
           endpoint: oss-cn-shanghai.aliyuncs.com
           folder: your-website-output-folder
 ```
-> 如果你使用了environment secret请[查看这里]()
+> 如果你使用了environment secret请[查看这里](#配置了environment-secret怎么不生效)
 ### 配置项
 - `accessKeyId`: **必填**
 - `accessKeySecret`: **必填**
