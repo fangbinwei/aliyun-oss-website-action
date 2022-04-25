@@ -40,7 +40,7 @@ func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
 func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
 	config, err := generateIncrementalConfig(records)
 	if err != nil {
-		fmt.Printf("Failed to generate incremental config: %v\n", err)
+		fmt.Printf("Failed to generate incremental info: %v\n", err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
 	}
 	err = bucket.PutObject(INCREMENTAL_CONFIG, bytes.NewReader(config), options...)
 	if err != nil {
-		fmt.Printf("Failed to upload incremental config: %v\n", err)
+		fmt.Printf("Failed to upload incremental info: %v\n", err)
 		return
 	}
 
@@ -60,7 +60,7 @@ func GetIncrementalConfig(bucket *oss.Bucket) (IncrementalConfig, error) {
 	c := new(bytes.Buffer)
 	body, err := bucket.GetObject(INCREMENTAL_CONFIG)
 	if err != nil {
-		fmt.Println("Failed to get incremental config")
+		fmt.Println("Failed to get incremental info")
 		return nil, err
 	}
 	io.Copy(c, body)
@@ -68,7 +68,7 @@ func GetIncrementalConfig(bucket *oss.Bucket) (IncrementalConfig, error) {
 	var config IncrementalConfig
 	err = config.parse(c.Bytes())
 	if err != nil {
-		fmt.Printf("Failed to parse incremental config: %v\n", err)
+		fmt.Printf("Failed to parse incremental info: %v\n", err)
 		return nil, err
 	}
 	fmt.Printf("Get incremental info: %s\n", INCREMENTAL_CONFIG)
