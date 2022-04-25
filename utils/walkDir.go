@@ -16,6 +16,7 @@ type FileInfoType struct {
 	Path    string
 	PathOSS string
 	Info    os.FileInfo
+	ContentMD5 string
 }
 
 // WalkDir get sub files of target dir
@@ -43,11 +44,13 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 			go walkDir(subdir, sw, fileInfos)
 		} else {
 			p := filepath.Join(dir, entryName)
+			contentMD5, _ := HashMD5(p)
 			fileInfos <- FileInfoType{
-				Dir:     dir,
-				Path:    p,
-				PathOSS: filepath.ToSlash(p),
-				Info:    entry,
+				ContentMD5: contentMD5,
+				Dir:        dir,
+				Path:       p,
+				PathOSS:    filepath.ToSlash(p),
+				Info:       entry,
 			}
 		}
 	}

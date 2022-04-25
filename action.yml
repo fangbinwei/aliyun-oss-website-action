@@ -31,6 +31,10 @@ inputs:
     description: '`true` to skip setting static pages related configuration. `indexPage`, `notFoundPage` will not be used.'
     required: false
     default: 'false'
+  incremental:
+    description: 'Save info of uploaded files to increase next upload speed'
+    required: false
+    default: 'true'
   indexPage:
     description: 'index page'
     required: false
@@ -63,6 +67,7 @@ runs:
     FOLDER: ${{ inputs.folder }}
     EXCLUDE: ${{ inputs.exclude }}
     SKIP_SETTING: ${{ inputs.skipSetting }}
+    INCREMENTAL: ${{ inputs.incremental }}
     INDEX_PAGE: ${{ inputs.indexPage }}
     NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
     HTML_CACHE_CONTROL: ${{ inputs.htmlCacheControl }}

@@ -12,15 +12,21 @@ import (
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 
+type UploadedObject struct {
+	ObjectKey   string
+	ContentMD5  string
+	incremental bool
+}
+
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType) ([]utils.FileInfoType, []error) {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, m IncrementalConfig) ([]UploadedObject, []error) {
 	root = path.Clean(root) + "/"
 
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex
 	var errs []error
-	uploaded := make([]utils.FileInfoType, 0, 20)
+	uploaded := make([]UploadedObject, 0, 20)
 	for item := range records {
 		sw.Add(1)
 		var tokens = make(chan struct{}, 10)
@@ -29,8 +35,19 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
 			if shouldExclude(objectKey) {
+				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
 			}
+			if m != nil {
+				// delete existed objectKey in incremental map, the left is what we should delete
+				defer delete(m, objectKey)
+			}
+			if shouldSkip(item, objectKey, m) {
+				fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
+				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, ContentMD5: item.ContentMD5, incremental: true})
+				return
+			}
+
 			tokens <- struct{}{}
 			options := getHTTPHeader(&item)
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
@@ -43,7 +60,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
 			uploadedMutex.Lock()
-			uploaded = append(uploaded, item)
+			uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, ContentMD5: item.ContentMD5})
 			uploadedMutex.Unlock()
 		}(item)
 	}
@@ -76,9 +93,22 @@ func getCacheControlOption(filename string) oss.Option {
 	return oss.CacheControl(value)
 }
 
-func shouldExclude(ossPath string) bool {
-	if utils.Match(config.Exclude, ossPath) {
-		fmt.Printf("skip uploading objectKey: %s\n\n", ossPath)
+func shouldExclude(objectKey string) bool {
+	if utils.Match(config.Exclude, objectKey) {
+		return true
+	}
+	return false
+}
+
+func shouldSkip(item utils.FileInfoType, objectKey string, m IncrementalConfig) bool {
+	if m == nil {
+		return false
+	}
+	val, ok := m[objectKey]
+	if !ok {
+		return false
+	}
+	if item.ContentMD5 == val.ContentMD5 {
 		return true
 	}
 	return false

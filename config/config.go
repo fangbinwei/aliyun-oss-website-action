@@ -21,6 +21,7 @@ var (
 	Client          *oss.Client
 	Bucket          *oss.Bucket
 	SkipSetting     bool
+	IsIncremental     bool
 
 	IndexPage         string
 	NotFoundPage      string
@@ -41,6 +42,7 @@ func init() {
 	Exclude = utils.GetActionInputAsSlice(os.Getenv("EXCLUDE"))
 	BucketName = os.Getenv("BUCKET")
 	SkipSetting = os.Getenv("SKIP_SETTING") == "true"
+	IsIncremental = os.Getenv("INCREMENTAL") == "true"
 
 	IndexPage = utils.Getenv("INDEX_PAGE", "index.html")
 	NotFoundPage = utils.Getenv("NOT_FOUND_PAGE", "404.html")
@@ -53,8 +55,8 @@ func init() {
 		fmt.Println(err)
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
-		Endpoint, BucketName, Folder, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
+	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
+		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\n",
 		HTMLCacheControl, ImageCacheControl, OtherCacheControl)
 

@@ -41,7 +41,7 @@ jobs:
     - run: yarn install
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@incremental
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
