@@ -71,7 +71,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 
 func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 	return []oss.Option{
-		getCacheControlOption(item.Info.Name()),
+		getCacheControlOption(item.Name),
 	}
 }
 

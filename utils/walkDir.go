@@ -12,10 +12,10 @@ var sema = make(chan struct{}, 20)
 
 // FileInfoType is a type which contains dir and os.FileInfo
 type FileInfoType struct {
-	Dir     string
-	Path    string
-	PathOSS string
-	Info    os.FileInfo
+	Dir        string
+	Path       string
+	PathOSS    string
+	Name       string
 	ContentMD5 string
 }
 
@@ -50,7 +50,7 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 				Dir:        dir,
 				Path:       p,
 				PathOSS:    filepath.ToSlash(p),
-				Info:       entry,
+				Name:       entryName,
 			}
 		}
 	}

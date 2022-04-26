@@ -67,11 +67,11 @@ func TestMain(t *testing.T) {
 		assert.NoError(err)
 		cacheControl := props.Get("Cache-Control")
 		if utils.IsImage(u.ObjectKey) {
-			assert.Equal(cacheControl, config.ImageCacheControl)
+			assert.Equal(config.ImageCacheControl, cacheControl)
 		} else if utils.IsHTML(u.ObjectKey) {
-			assert.Equal(cacheControl, config.HTMLCacheControl)
+			assert.Equal(config.HTMLCacheControl, cacheControl)
 		} else {
-			assert.Equal(cacheControl, config.OtherCacheControl)
+			assert.Equal(config.OtherCacheControl, cacheControl)
 		}
 	}
 
