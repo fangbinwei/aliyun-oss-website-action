@@ -12,13 +12,13 @@ var sema = make(chan struct{}, 20)
 
 // FileInfoType is a type which contains dir and os.FileInfo
 type FileInfoType struct {
-	Dir        string
-	Path       string
-	PathOSS    string
-	Name       string
-	ContentMD5 string
-	// if ContentMD5 is valid
-	ValidHash bool
+	Dir          string
+	Path         string
+	PathOSS      string
+	Name         string
+	CacheControl string // Complete 'CacheControl' when uploading files
+	ContentMD5   string
+	ValidHash    bool // if ContentMD5 is valid
 }
 
 // WalkDir get sub files of target dir

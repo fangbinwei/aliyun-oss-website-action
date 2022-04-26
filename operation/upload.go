@@ -34,6 +34,8 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			defer sw.Done()
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
+			options := getHTTPHeader(&item)
+
 			if shouldExclude(objectKey) {
 				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
@@ -47,7 +49,6 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			}
 
 			tokens <- struct{}{}
-			options := getHTTPHeader(&item)
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
 			<-tokens
 			if err != nil {
@@ -71,12 +72,14 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 
 func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 	return []oss.Option{
-		getCacheControlOption(item.Name),
+		getCacheControlOption(item),
 	}
 }
 
-func getCacheControlOption(filename string) oss.Option {
+func getCacheControlOption(item *utils.FileInfoType) oss.Option {
 	var value string
+	filename := item.Name
+
 	if utils.IsHTML(filename) {
 		value = config.HTMLCacheControl
 	} else if utils.IsImage(filename) {
@@ -88,6 +91,7 @@ func getCacheControlOption(filename string) oss.Option {
 		// 30 days
 		value = config.OtherCacheControl
 	}
+	item.CacheControl = value
 	return oss.CacheControl(value)
 }
 
@@ -103,7 +107,7 @@ func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig)
 		return false
 	}
 	i.RLock()
-	val, ok := i.m[objectKey]
+	remoteConfig, ok := i.m[objectKey]
 	i.RUnlock()
 	if !ok {
 		return false
@@ -112,7 +116,7 @@ func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig)
 	i.Lock()
 	delete(i.m, objectKey)
 	i.Unlock()
-	if item.ValidHash && item.ContentMD5 == val.ContentMD5 {
+	if item.ValidHash && item.ContentMD5 == remoteConfig.ContentMD5 && item.CacheControl == remoteConfig.CacheControl {
 		return true
 	}
 	return false

@@ -51,7 +51,10 @@ func DeleteObjectsIncremental(bucket *oss.Bucket, i *IncrementalConfig) []error 
 		return nil
 	}
 	// delete incremental info
-	i.m[INCREMENTAL_CONFIG] = struct{ContentMD5 string}{}
+	i.m[INCREMENTAL_CONFIG] = struct {
+		ContentMD5   string
+		CacheControl string
+	}{}
 
 	// TODO: optimize
 	var errs []error
