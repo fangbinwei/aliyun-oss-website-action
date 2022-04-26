@@ -7,7 +7,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 ## 概览
 - 在阿里云OSS创建一个存放网站的bucket
 - 准备一个域名, 可能需要备案(bucket选择非大陆区域, 可以不备案, 但是如果CDN加速区域包括大陆, 仍然需要备案)
-- 在你的网站repo中, 配置github action, 当action触发, 会清除bucket中原有的文件, 上传网站repo生成的资源文件到bucket中
+- 在你的网站repo中, 配置github action, action 触发则增量上传网站repo生成的资源文件到bucket中
 - 通过阿里云OSS的CDN, 可以很方便地加速网站的访问, 支持HTTPS
 
 ## Usage
@@ -32,12 +32,27 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `bucket`: **必填**,部署网站的bucket, 用于存放网站的资源
 - `indexPage`: 默认`index.html`.网站首页(用于[静态页面配置](#静态页面配置))
 - `notFoundPage`: 默认`404.html`.网站404页面(用于[静态页面配置](#静态页面配置))
+- `incremental`: 默认`true`. 使用增量上传.
 - `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
 - `htmlCacheControl`: 默认`no-cache`
 - `imageCacheControl`: 默认`max-age=864000`
 - `otherCacheControl`: 默认`max-age=2592000`
 - `exclude`: 不上传`folder`下的某些文件/文件夹
 - `cname`: 默认`false`. 若`endpoint`填写自定义域名/bucket域名, 需设置为`true`. (使用CDN的场景下, 不推荐使用自定义域名)
+
+## incremental
+**开启`incremental`**
+上传文件到OSS后, 还会将文件的`ContentMD5`和`Cache-Control`收集到名为`.actioninfo`的私有文件中. 当再次触发action的时候, 会将待上传的文件信息与`.actioninfo`中记录的信息比对, 信息未发生变化的文件将跳过上传步骤, 只进行增量上传. 且在上传之后, 根据`.actioninfo`和已上传的文件信息, 将OSS中多余的文件进行删除.
+
+> `.actioninfo` 记录了上一次action执行时, 所上传的文件信息. 私有, 不可公共读写.
+
+**关闭`incremental`** 或 OSS中不存在`.actioninfo`文件
+
+会执行如下步骤
+1. 清除所有OSS中已有的文件
+2. 上传新的文件到OSS中
+
+> **计划未来优化这个步骤, 优化后, 先上传新的文件到OSS中, 再diff删除多余的文件.** 
 
 ## Cache-Control
 为上传的资源默认设置的`Cache-Control`如下
