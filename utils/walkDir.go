@@ -17,6 +17,8 @@ type FileInfoType struct {
 	PathOSS    string
 	Name       string
 	ContentMD5 string
+	// if ContentMD5 is valid
+	ValidHash bool
 }
 
 // WalkDir get sub files of target dir
@@ -46,6 +48,7 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 			p := filepath.Join(dir, entryName)
 			contentMD5, _ := HashMD5(p)
 			fileInfos <- FileInfoType{
+				ValidHash:  contentMD5 != "",
 				ContentMD5: contentMD5,
 				Dir:        dir,
 				Path:       p,

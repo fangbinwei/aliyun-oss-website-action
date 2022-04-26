@@ -33,6 +33,9 @@ func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
 	i := new(IncrementalConfig)
 	i.m = make(map[string]struct{ ContentMD5 string })
 	for _, u := range uploaded {
+		if !u.ValidHash {
+			continue
+		}
 		i.m[u.ObjectKey] = struct{ ContentMD5 string }{
 			ContentMD5: u.ContentMD5,
 		}

@@ -14,8 +14,8 @@ import (
 
 type UploadedObject struct {
 	ObjectKey   string
-	ContentMD5  string
-	incremental bool
+	Incremental bool
+	utils.FileInfoType
 }
 
 // UploadObjects upload files to OSS
@@ -41,7 +41,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			if shouldSkip(item, objectKey, i) {
 				fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
 				uploadedMutex.Lock()
-				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, ContentMD5: item.ContentMD5, incremental: true})
+				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, Incremental: true, FileInfoType: item})
 				uploadedMutex.Unlock()
 				return
 			}
@@ -58,7 +58,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
 			uploadedMutex.Lock()
-			uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, ContentMD5: item.ContentMD5})
+			uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, FileInfoType: item})
 			uploadedMutex.Unlock()
 		}(item)
 	}
@@ -112,7 +112,7 @@ func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig)
 	i.Lock()
 	delete(i.m, objectKey)
 	i.Unlock()
-	if item.ContentMD5 == val.ContentMD5 {
+	if item.ValidHash && item.ContentMD5 == val.ContentMD5 {
 		return true
 	}
 	return false
