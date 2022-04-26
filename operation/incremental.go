@@ -5,40 +5,45 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 
 const INCREMENTAL_CONFIG = ".actioninfo"
 
-type IncrementalConfig map[string]struct {
-	ContentMD5 string
+type IncrementalConfig struct {
+	sync.RWMutex
+	m map[string]struct {
+		ContentMD5 string
+	}
 }
 
 func (i *IncrementalConfig) stringify() ([]byte, error) {
-	j, err := json.Marshal(i)
+	j, err := json.Marshal(i.m)
 	return j, err
 }
 
 func (i *IncrementalConfig) parse(raw []byte) error {
-	err := json.Unmarshal(raw, i)
+	err := json.Unmarshal(raw, &(i.m))
 	return err
 }
 
 func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
-	config := make(IncrementalConfig)
+	i := new(IncrementalConfig)
+	i.m = make(map[string]struct{ ContentMD5 string })
 	for _, u := range uploaded {
-		config[u.ObjectKey] = struct{ ContentMD5 string }{
+		i.m[u.ObjectKey] = struct{ ContentMD5 string }{
 			ContentMD5: u.ContentMD5,
 		}
 	}
-	j, err:= config.stringify()
+	j, err := i.stringify()
 	return j, err
 
 }
 
 func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
-	config, err := generateIncrementalConfig(records)
+	j, err := generateIncrementalConfig(records)
 	if err != nil {
 		fmt.Printf("Failed to generate incremental info: %v\n", err)
 		return
@@ -47,7 +52,7 @@ func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
 	options := []oss.Option{
 		oss.ObjectACL(oss.ACLPrivate),
 	}
-	err = bucket.PutObject(INCREMENTAL_CONFIG, bytes.NewReader(config), options...)
+	err = bucket.PutObject(INCREMENTAL_CONFIG, bytes.NewReader(j), options...)
 	if err != nil {
 		fmt.Printf("Failed to upload incremental info: %v\n", err)
 		return
@@ -56,22 +61,22 @@ func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
 	fmt.Printf("Upload incremental info: %s\n", INCREMENTAL_CONFIG)
 }
 
-func GetIncrementalConfig(bucket *oss.Bucket) (IncrementalConfig, error) {
+func GetRemoteIncrementalConfig(bucket *oss.Bucket) (*IncrementalConfig, error) {
 	c := new(bytes.Buffer)
 	body, err := bucket.GetObject(INCREMENTAL_CONFIG)
 	if err != nil {
-		fmt.Println("Failed to get incremental info")
+		fmt.Println("Failed to get remote incremental info")
 		return nil, err
 	}
 	io.Copy(c, body)
 	body.Close()
-	var config IncrementalConfig
-	err = config.parse(c.Bytes())
+	i := new(IncrementalConfig)
+	err = i.parse(c.Bytes())
 	if err != nil {
-		fmt.Printf("Failed to parse incremental info: %v\n", err)
+		fmt.Printf("Failed to parse remote incremental info: %v\n", err)
 		return nil, err
 	}
-	fmt.Printf("Get incremental info: %s\n", INCREMENTAL_CONFIG)
+	fmt.Printf("Get remote incremental info: %s\n", INCREMENTAL_CONFIG)
 
-	return config, nil
+	return i, nil
 }

@@ -19,13 +19,12 @@ type UploadedObject struct {
 }
 
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, m IncrementalConfig) ([]UploadedObject, []error) {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, i *IncrementalConfig) ([]UploadedObject, []error) {
 	root = path.Clean(root) + "/"
 
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex
-	var mapMutex sync.Mutex
 	var errs []error
 	uploaded := make([]UploadedObject, 0, 20)
 	for item := range records {
@@ -39,15 +38,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
 			}
-			if m != nil {
-				// delete existed objectKey in incremental map, the left is what we should delete
-				defer func() {
-					mapMutex.Lock()
-					delete(m, objectKey)
-					mapMutex.Unlock()
-				}()
-			}
-			if shouldSkip(item, objectKey, m, &mapMutex) {
+			if shouldSkip(item, objectKey, i) {
 				fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
 				uploadedMutex.Lock()
 				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, ContentMD5: item.ContentMD5, incremental: true})
@@ -107,16 +98,20 @@ func shouldExclude(objectKey string) bool {
 	return false
 }
 
-func shouldSkip(item utils.FileInfoType, objectKey string, m IncrementalConfig, mapMutex *sync.Mutex) bool {
-	if m == nil {
+func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig) bool {
+	if i == nil {
 		return false
 	}
-	mapMutex.Lock()
-	val, ok := m[objectKey]
-	mapMutex.Unlock()
+	i.RLock()
+	val, ok := i.m[objectKey]
+	i.RUnlock()
 	if !ok {
 		return false
 	}
+	// delete existed objectKey in incremental map, the left is what we should delete
+	i.Lock()
+	delete(i.m, objectKey)
+	i.Unlock()
 	if item.ContentMD5 == val.ContentMD5 {
 		return true
 	}

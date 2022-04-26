@@ -46,12 +46,12 @@ func DeleteObjects(bucket *oss.Bucket) []error {
 	return nil
 }
 
-func DeleteObjectsIncremental(bucket *oss.Bucket, m IncrementalConfig) []error {
-	if m == nil {
+func DeleteObjectsIncremental(bucket *oss.Bucket, i *IncrementalConfig) []error {
+	if i == nil {
 		return nil
 	}
 	// delete incremental info
-	m[INCREMENTAL_CONFIG] = struct{ContentMD5 string}{}
+	i.m[INCREMENTAL_CONFIG] = struct{ContentMD5 string}{}
 
 	// TODO: optimize
 	var errs []error
@@ -59,7 +59,7 @@ func DeleteObjectsIncremental(bucket *oss.Bucket, m IncrementalConfig) []error {
 	var sw sync.WaitGroup
 	var mutex sync.Mutex
 	tokens := make(chan struct{}, 10)
-	for k := range m {
+	for k := range i.m {
 		sw.Add(1)
 		go func(key string) {
 			defer sw.Done()

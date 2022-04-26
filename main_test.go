@@ -18,14 +18,14 @@ func TestMain(t *testing.T) {
 	assert.NoError(err)
 
 	fmt.Println("---- [incremental] ---->")
-	incremental, err := operation.GetIncrementalConfig(config.Bucket)
+	incremental, err := operation.GetRemoteIncrementalConfig(config.Bucket)
 	// assert.NoError(err)
-	fmt.Println("<---- [incremental] ----")
+	fmt.Println("<---- [incremental end] ----")
 
 	if incremental == nil {
 		fmt.Println("---- [delete] ---->")
 		errs := operation.DeleteObjects(config.Bucket)
-		fmt.Println("<---- [delete] ----")
+		fmt.Println("<---- [delete end] ----")
 		assert.Equal(len(errs), 0)
 	}
 
@@ -35,14 +35,14 @@ func TestMain(t *testing.T) {
 	config.Exclude = []string{"exclude.txt", "exclude/"}
 	fmt.Println("---- [upload]  ---->")
 	uploaded, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records, incremental)
-	fmt.Println("<---- [upload]  ----")
+	fmt.Println("<---- [upload end]  ----")
 	assert.Equal(len(uploadErrs), 0, uploadErrs)
 
 	// test incremental
 	if incremental != nil {
 		fmt.Println("---- [delete] ---->")
 		errs := operation.DeleteObjectsIncremental(config.Bucket, incremental)
-		fmt.Println("<---- [delete] ----")
+		fmt.Println("<---- [delete end] ----")
 		assert.Equal(len(errs), 0)
 	}
 
@@ -52,7 +52,7 @@ func TestMain(t *testing.T) {
 
 	fmt.Println("---- [incremental] ---->")
 	operation.UploadIncrementalConfig(config.Bucket, uploaded)
-	fmt.Println("<---- [incremental] ----")
+	fmt.Println("<---- [incremental end] ----")
 
 	// test exclude
 	lor, err = config.Bucket.ListObjects(oss.Prefix("exclude"))
