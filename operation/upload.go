@@ -107,14 +107,14 @@ func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig)
 		return false
 	}
 	i.RLock()
-	remoteConfig, ok := i.m[objectKey]
+	remoteConfig, ok := i.M[objectKey]
 	i.RUnlock()
 	if !ok {
 		return false
 	}
 	// delete existed objectKey in incremental map, the left is what we should delete
 	i.Lock()
-	delete(i.m, objectKey)
+	delete(i.M, objectKey)
 	i.Unlock()
 	if item.ValidHash && item.ContentMD5 == remoteConfig.ContentMD5 && item.CacheControl == remoteConfig.CacheControl {
 		return true

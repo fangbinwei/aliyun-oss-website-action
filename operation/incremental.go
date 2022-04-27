@@ -14,25 +14,25 @@ const INCREMENTAL_CONFIG = ".actioninfo"
 
 type IncrementalConfig struct {
 	sync.RWMutex
-	m map[string]struct {
+	M map[string]struct {
 		ContentMD5   string
 		CacheControl string
 	}
 }
 
 func (i *IncrementalConfig) stringify() ([]byte, error) {
-	j, err := json.Marshal(i.m)
+	j, err := json.Marshal(i.M)
 	return j, err
 }
 
 func (i *IncrementalConfig) parse(raw []byte) error {
-	err := json.Unmarshal(raw, &(i.m))
+	err := json.Unmarshal(raw, &(i.M))
 	return err
 }
 
 func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
 	i := new(IncrementalConfig)
-	i.m = make(map[string]struct {
+	i.M = make(map[string]struct {
 		ContentMD5   string
 		CacheControl string
 	})
@@ -40,7 +40,7 @@ func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
 		if !u.ValidHash {
 			continue
 		}
-		i.m[u.ObjectKey] = struct {
+		i.M[u.ObjectKey] = struct {
 			ContentMD5   string
 			CacheControl string
 		}{
@@ -53,11 +53,11 @@ func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
 
 }
 
-func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
+func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) error {
 	j, err := generateIncrementalConfig(records)
 	if err != nil {
 		fmt.Printf("Failed to generate incremental info: %v\n", err)
-		return
+		return err
 	}
 
 	options := []oss.Option{
@@ -66,10 +66,11 @@ func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) {
 	err = bucket.PutObject(INCREMENTAL_CONFIG, bytes.NewReader(j), options...)
 	if err != nil {
 		fmt.Printf("Failed to upload incremental info: %v\n", err)
-		return
+		return err
 	}
 
 	fmt.Printf("Upload incremental info: %s\n", INCREMENTAL_CONFIG)
+	return nil
 }
 
 func GetRemoteIncrementalConfig(bucket *oss.Bucket) (*IncrementalConfig, error) {

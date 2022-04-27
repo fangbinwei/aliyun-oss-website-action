@@ -63,6 +63,7 @@ func dirents(dir string) []os.FileInfo {
 	sema <- struct{}{}        // acquire token
 	defer func() { <-sema }() // release token
 
+	// TOOD: use os.ReadDir
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Printf("dirents error: %v\n", err)

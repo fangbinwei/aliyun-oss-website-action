@@ -51,7 +51,7 @@ func DeleteObjectsIncremental(bucket *oss.Bucket, i *IncrementalConfig) []error 
 		return nil
 	}
 	// delete incremental info
-	i.m[INCREMENTAL_CONFIG] = struct {
+	i.M[INCREMENTAL_CONFIG] = struct {
 		ContentMD5   string
 		CacheControl string
 	}{}
@@ -62,7 +62,7 @@ func DeleteObjectsIncremental(bucket *oss.Bucket, i *IncrementalConfig) []error 
 	var sw sync.WaitGroup
 	var mutex sync.Mutex
 	tokens := make(chan struct{}, 10)
-	for k := range i.m {
+	for k := range i.M {
 		sw.Add(1)
 		go func(key string) {
 			defer sw.Done()
