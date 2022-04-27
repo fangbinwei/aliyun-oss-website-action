@@ -18,17 +18,44 @@ func main() {
 		fmt.Println("skip setting static pages related configuration")
 	}
 
-	fmt.Println("---- delete start ----")
-	deleteErrs := operation.DeleteObjects(config.Bucket)
-	utils.LogErrors(deleteErrs)
-	fmt.Println("---- delete end ----")
+	var incremental *operation.IncrementalConfig
+	if config.IsIncremental {
+		fmt.Println("---- [incremental] ---->")
+		incremental, _ = operation.GetRemoteIncrementalConfig(config.Bucket)
+		fmt.Println("<---- [incremental end] ----")
+		fmt.Println()
+	}
+	if !config.IsIncremental || incremental == nil {
+		// TODO: delete after upload
+		fmt.Println("---- [delete] ---->")
+		deleteErrs := operation.DeleteObjects(config.Bucket)
+		utils.LogErrors(deleteErrs)
+		fmt.Println("<---- [delete end] ----")
+		fmt.Println()
+	}
 
 	records := utils.WalkDir(config.Folder)
 
-	fmt.Println("---- upload start ----")
-	_, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records)
+	fmt.Println("---- [upload] ---->")
+	uploaded, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records, incremental)
 	utils.LogErrors(uploadErrs)
-	fmt.Println("---- upload end ----")
+	fmt.Println("<---- [upload end] ----")
+	fmt.Println()
+
+	if config.IsIncremental && incremental != nil {
+		fmt.Println("---- [delete] ---->")
+		deleteErrs := operation.DeleteObjectsIncremental(config.Bucket, incremental)
+		utils.LogErrors(deleteErrs)
+		fmt.Println("<---- [delete end] ----")
+		fmt.Println()
+	}
+
+	if config.IsIncremental {
+		fmt.Println("---- [incremental] ---->")
+		operation.UploadIncrementalConfig(config.Bucket, uploaded)
+		fmt.Println("<---- [incremental end] ----")
+		fmt.Println()
+	}
 
 	if len(uploadErrs) > 0 {
 		os.Exit(1)

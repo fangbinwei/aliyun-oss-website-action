@@ -12,15 +12,21 @@ import (
 	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
 )
 
+type UploadedObject struct {
+	ObjectKey   string
+	Incremental bool
+	utils.FileInfoType
+}
+
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType) ([]utils.FileInfoType, []error) {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, i *IncrementalConfig) ([]UploadedObject, []error) {
 	root = path.Clean(root) + "/"
 
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex
 	var errs []error
-	uploaded := make([]utils.FileInfoType, 0, 20)
+	uploaded := make([]UploadedObject, 0, 20)
 	for item := range records {
 		sw.Add(1)
 		var tokens = make(chan struct{}, 10)
@@ -28,11 +34,21 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			defer sw.Done()
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
+			options := getHTTPHeader(&item)
+
 			if shouldExclude(objectKey) {
+				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
 			}
+			if shouldSkip(item, objectKey, i) {
+				fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
+				uploadedMutex.Lock()
+				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, Incremental: true, FileInfoType: item})
+				uploadedMutex.Unlock()
+				return
+			}
+
 			tokens <- struct{}{}
-			options := getHTTPHeader(&item)
 			err := bucket.PutObjectFromFile(objectKey, fPath, options...)
 			<-tokens
 			if err != nil {
@@ -43,7 +59,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			}
 			fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
 			uploadedMutex.Lock()
-			uploaded = append(uploaded, item)
+			uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, FileInfoType: item})
 			uploadedMutex.Unlock()
 		}(item)
 	}
@@ -56,12 +72,14 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 
 func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 	return []oss.Option{
-		getCacheControlOption(item.Info.Name()),
+		getCacheControlOption(item),
 	}
 }
 
-func getCacheControlOption(filename string) oss.Option {
+func getCacheControlOption(item *utils.FileInfoType) oss.Option {
 	var value string
+	filename := item.Name
+
 	if utils.IsHTML(filename) {
 		value = config.HTMLCacheControl
 	} else if utils.IsImage(filename) {
@@ -73,12 +91,32 @@ func getCacheControlOption(filename string) oss.Option {
 		// 30 days
 		value = config.OtherCacheControl
 	}
+	item.CacheControl = value
 	return oss.CacheControl(value)
 }
 
-func shouldExclude(ossPath string) bool {
-	if utils.Match(config.Exclude, ossPath) {
-		fmt.Printf("skip uploading objectKey: %s\n\n", ossPath)
+func shouldExclude(objectKey string) bool {
+	if utils.Match(config.Exclude, objectKey) {
+		return true
+	}
+	return false
+}
+
+func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig) bool {
+	if i == nil {
+		return false
+	}
+	i.RLock()
+	remoteConfig, ok := i.M[objectKey]
+	i.RUnlock()
+	if !ok {
+		return false
+	}
+	// delete existed objectKey in incremental map, the left is what we should delete
+	i.Lock()
+	delete(i.M, objectKey)
+	i.Unlock()
+	if item.ValidHash && item.ContentMD5 == remoteConfig.ContentMD5 && item.CacheControl == remoteConfig.CacheControl {
 		return true
 	}
 	return false

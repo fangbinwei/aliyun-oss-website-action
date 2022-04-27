@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - 'master'
 
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
     - run: yarn install
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@master
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
@@ -61,3 +61,29 @@ jobs:
             demo2/*.md
             demo2/*/*.md
 
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: fangbinwei/aliyun-oss-website-action:latest

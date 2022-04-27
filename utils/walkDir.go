@@ -12,10 +12,13 @@ var sema = make(chan struct{}, 20)
 
 // FileInfoType is a type which contains dir and os.FileInfo
 type FileInfoType struct {
-	Dir     string
-	Path    string
-	PathOSS string
-	Info    os.FileInfo
+	Dir          string
+	Path         string
+	PathOSS      string
+	Name         string
+	CacheControl string // Complete 'CacheControl' when uploading files
+	ContentMD5   string
+	ValidHash    bool // if ContentMD5 is valid
 }
 
 // WalkDir get sub files of target dir
@@ -43,11 +46,14 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 			go walkDir(subdir, sw, fileInfos)
 		} else {
 			p := filepath.Join(dir, entryName)
+			contentMD5, _ := HashMD5(p)
 			fileInfos <- FileInfoType{
-				Dir:     dir,
-				Path:    p,
-				PathOSS: filepath.ToSlash(p),
-				Info:    entry,
+				ValidHash:  contentMD5 != "",
+				ContentMD5: contentMD5,
+				Dir:        dir,
+				Path:       p,
+				PathOSS:    filepath.ToSlash(p),
+				Name:       entryName,
 			}
 		}
 	}
@@ -57,6 +63,7 @@ func dirents(dir string) []os.FileInfo {
 	sema <- struct{}{}        // acquire token
 	defer func() { <-sema }() // release token
 
+	// TOOD: use os.ReadDir
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Printf("dirents error: %v\n", err)
