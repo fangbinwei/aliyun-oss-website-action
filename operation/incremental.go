@@ -77,7 +77,7 @@ func GetRemoteIncrementalConfig(bucket *oss.Bucket) (*IncrementalConfig, error) 
 	c := new(bytes.Buffer)
 	body, err := bucket.GetObject(INCREMENTAL_CONFIG)
 	if err != nil {
-		fmt.Println("Failed to get remote incremental info")
+		fmt.Printf("Failed to get remote incremental info: %v\n", err)
 		return nil, err
 	}
 	io.Copy(c, body)
