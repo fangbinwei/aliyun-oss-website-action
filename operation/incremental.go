@@ -69,7 +69,7 @@ func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) error
 		return err
 	}
 
-	fmt.Printf("Upload incremental info: %s\n", INCREMENTAL_CONFIG)
+	fmt.Printf("Update & Upload incremental info: %s\n", INCREMENTAL_CONFIG)
 	return nil
 }
 
