@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-var sema = make(chan struct{}, 5)
+var sema = make(chan struct{}, 15)
 
 // FileInfoType is a type which contains dir and os.FileInfo
 type FileInfoType struct {

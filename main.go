@@ -38,7 +38,22 @@ func main() {
 
 	fmt.Println("---- [upload] ---->")
 	uploaded, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records, incremental)
+
 	operation.LogUploadedResult(uploaded, uploadErrs)
+
+	if len(uploadErrs) > 0 {
+		uploaded2, uploadErrs2 := operation.RetryUpload(uploadErrs)
+		operation.LogUploadedResult(uploaded2, uploadErrs2)
+		uploaded = append(uploaded, uploaded2...)
+		uploadErrs = uploadErrs2
+
+		if len(uploadErrs) > 0 {
+			uploaded3, uploadErrs3 := operation.RetryUpload(uploadErrs)
+			operation.LogUploadedResult(uploaded3, uploadErrs3)
+			uploaded = append(uploaded, uploaded3...)
+			uploadErrs = uploadErrs3
+		}
+	}
 
 	fmt.Println("<---- [upload end] ----")
 	fmt.Println()

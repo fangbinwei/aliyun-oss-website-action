@@ -17,6 +17,17 @@ type UploadedObject struct {
 	Incremental bool
 	utils.FileInfoType
 }
+type UploadError struct {
+	detail    utils.FileInfoType
+	objectKey string
+	fPath     string
+	msg       string
+	rawError  error
+}
+
+func (e *UploadError) Error() string {
+	return fmt.Sprintf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", e.objectKey, e.fPath, e.msg)
+}
 
 // UploadObjects upload files to OSS
 func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, i *IncrementalConfig) ([]UploadedObject, []error) {
@@ -29,7 +40,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	uploaded := make([]UploadedObject, 0, 50)
 	for item := range records {
 		sw.Add(1)
-		var tokens = make(chan struct{}, 5)
+		var tokens = make(chan struct{}, 10)
 		go func(item utils.FileInfoType) {
 			defer sw.Done()
 			fPath := item.Path
@@ -53,7 +64,8 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			<-tokens
 			if err != nil {
 				errorMutex.Lock()
-				errs = append(errs, fmt.Errorf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", objectKey, fPath, err))
+				uErr := &UploadError{detail: item, fPath: fPath, objectKey: objectKey, rawError: err, msg: err.Error()}
+				errs = append(errs, uErr)
 				errorMutex.Unlock()
 				return
 			}
@@ -70,6 +82,19 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	return uploaded, nil
 }
 
+func RetryUpload(errs []error) ([]UploadedObject, []error) {
+	records := make(chan utils.FileInfoType, 50)
+	go func() {
+		defer close(records)
+		for _, item := range errs {
+			if uploadError, ok := item.(*UploadError); ok {
+				records <- uploadError.detail
+			}
+		}
+	}()
+	return UploadObjects(config.Folder, config.Bucket, records, nil)
+}
+
 func LogUploadedResult(result []UploadedObject, errs []error) {
 	if result == nil {
 		return
@@ -84,7 +109,7 @@ func LogUploadedResult(result []UploadedObject, errs []error) {
 			uploadedCount++
 		}
 	}
-	utils.LogErrors(errs)
+	// utils.LogErrors(errs)
 	fmt.Printf("\nuploaded %v object(s), skipped %v object(s), %v error(s).\n", uploadedCount, skippedCount, len(errs))
 }
 
