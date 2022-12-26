@@ -39,6 +39,8 @@ func main() {
 	fmt.Println("---- [upload] ---->")
 	uploaded, uploadErrs := operation.UploadObjects(config.Folder, config.Bucket, records, incremental)
 	utils.LogErrors(uploadErrs)
+	fmt.Printf("\nuploaded %v object(s), %v error(s).", len(uploaded), len(uploadErrs))
+
 	fmt.Println("<---- [upload end] ----")
 	fmt.Println()
 

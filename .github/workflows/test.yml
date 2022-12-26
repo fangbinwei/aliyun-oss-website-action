@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'dev'
 
 jobs:
   build:
@@ -46,8 +47,8 @@ jobs:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
           bucket: fangbinwei-blog
-          endpoint: b.fangbinwei.cn
-          cname: true
+          endpoint: oss-cn-shanghai.aliyuncs.com
+          cname: false
           # folder in /github/workspace
           folder: .vuepress/dist
           htmlCacheControl: no-cache
