@@ -70,6 +70,24 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	return uploaded, nil
 }
 
+func LogUploadedResult(result []UploadedObject, errs []error) {
+	if result == nil {
+		return
+	}
+	uploadedCount := 0
+	skippedCount := 0
+
+	for _, v := range result {
+		if v.Incremental {
+			skippedCount++
+		} else {
+			uploadedCount++
+		}
+	}
+	utils.LogErrors(errs)
+	fmt.Printf("\nuploaded %v object(s), skipped %v object(s), %v error(s).\n", uploadedCount, skippedCount, len(errs))
+}
+
 func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
 	return []oss.Option{
 		getCacheControlOption(item),
