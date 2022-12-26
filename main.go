@@ -41,20 +41,11 @@ func main() {
 
 	operation.LogUploadedResult(uploaded, uploadErrs)
 
-	if len(uploadErrs) > 0 {
-		uploaded2, uploadErrs2 := operation.RetryUpload(uploadErrs)
-		operation.LogUploadedResult(uploaded2, uploadErrs2)
-		uploaded = append(uploaded, uploaded2...)
-		uploadErrs = uploadErrs2
+	retried, uploadErrs:=operation.UploadRetry(uploadErrs, 5)
 
-		if len(uploadErrs) > 0 {
-			uploaded3, uploadErrs3 := operation.RetryUpload(uploadErrs)
-			operation.LogUploadedResult(uploaded3, uploadErrs3)
-			uploaded = append(uploaded, uploaded3...)
-			uploadErrs = uploadErrs3
-		}
-	}
+	uploaded = append(uploaded, retried...)
 
+	utils.LogErrors(uploadErrs)
 	fmt.Println("<---- [upload end] ----")
 	fmt.Println()
 

@@ -82,17 +82,35 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	return uploaded, nil
 }
 
-func RetryUpload(errs []error) ([]UploadedObject, []error) {
-	records := make(chan utils.FileInfoType, 50)
-	go func() {
-		defer close(records)
-		for _, item := range errs {
-			if uploadError, ok := item.(*UploadError); ok {
-				records <- uploadError.detail
+func UploadRetry(errs []error, times int) ([]UploadedObject, []error) {
+	if len(errs) == 0 {
+		return []UploadedObject{}, nil
+	}
+	uploadedResult := make([]UploadedObject, 0, 50)
+
+	retry := func(e []error) ([]UploadedObject, []error) {
+		records := make(chan utils.FileInfoType, 50)
+		go func() {
+			defer close(records)
+			for _, item := range e {
+				if uploadError, ok := item.(*UploadError); ok {
+					records <- uploadError.detail
+				}
 			}
+		}()
+		return UploadObjects(config.Folder, config.Bucket, records, nil)
+	}
+	for i := 0; i < times; i++ {
+		if len(errs) == 0 {
+			return uploadedResult, nil
 		}
-	}()
-	return UploadObjects(config.Folder, config.Bucket, records, nil)
+		uploaded, uploadError := retry(errs)
+		fmt.Printf("\n[RETRY %v]", i+1)
+		LogUploadedResult(uploaded, uploadError)
+		uploadedResult = append(uploadedResult, uploaded...)
+		errs = uploadError
+	}
+	return uploadedResult, errs
 }
 
 func LogUploadedResult(result []UploadedObject, errs []error) {
@@ -109,7 +127,6 @@ func LogUploadedResult(result []UploadedObject, errs []error) {
 			uploadedCount++
 		}
 	}
-	// utils.LogErrors(errs)
 	fmt.Printf("\nuploaded %v object(s), skipped %v object(s), %v error(s).\n", uploadedCount, skippedCount, len(errs))
 }
 
