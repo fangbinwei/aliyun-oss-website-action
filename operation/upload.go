@@ -26,7 +26,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex
 	var errs []error
-	uploaded := make([]UploadedObject, 0, 20)
+	uploaded := make([]UploadedObject, 0, 15)
 	for item := range records {
 		sw.Add(1)
 		var tokens = make(chan struct{}, 10)
@@ -37,11 +37,11 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			options := getHTTPHeader(&item)
 
 			if shouldExclude(objectKey) {
-				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
+				// fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
 			}
 			if shouldSkip(item, objectKey, i) {
-				fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
+				// fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
 				uploadedMutex.Lock()
 				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, Incremental: true, FileInfoType: item})
 				uploadedMutex.Unlock()
@@ -57,7 +57,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 				errorMutex.Unlock()
 				return
 			}
-			fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
+			// fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
 			uploadedMutex.Lock()
 			uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, FileInfoType: item})
 			uploadedMutex.Unlock()
