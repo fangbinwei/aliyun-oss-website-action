@@ -5,6 +5,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"time"
 
 	"aliyun-oss-website-action/config"
 	"aliyun-oss-website-action/utils"
@@ -89,7 +90,8 @@ func UploadRetry(errs []error, times int) ([]UploadedObject, []error) {
 	uploadedResult := make([]UploadedObject, 0, 50)
 
 	retry := func(e []error) ([]UploadedObject, []error) {
-		records := make(chan utils.FileInfoType, 50)
+		time.Sleep(time.Second * 3)
+		records := make(chan utils.FileInfoType, 20)
 		go func() {
 			defer close(records)
 			for _, item := range e {

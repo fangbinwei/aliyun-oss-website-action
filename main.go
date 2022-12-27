@@ -41,7 +41,7 @@ func main() {
 
 	operation.LogUploadedResult(uploaded, uploadErrs)
 
-	retried, uploadErrs := operation.UploadRetry(uploadErrs, 8)
+	retried, uploadErrs := operation.UploadRetry(uploadErrs, 15)
 
 	uploaded = append(uploaded, retried...)
 
