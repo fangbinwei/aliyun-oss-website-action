@@ -25,23 +25,31 @@ type UploadError struct {
 	msg       string
 	rawError  error
 }
+type UploadOptions struct {
+	I           *IncrementalConfig
+	Concurrency int
+}
 
 func (e *UploadError) Error() string {
 	return fmt.Sprintf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", e.objectKey, e.fPath, e.msg)
 }
 
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, i *IncrementalConfig) ([]UploadedObject, []error) {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, uploadOptions UploadOptions) ([]UploadedObject, []error) {
 	root = path.Clean(root) + "/"
+	concurrency := uploadOptions.Concurrency
+	if concurrency <= 0 {
+		concurrency = 30
+	}
 
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex
 	var errs []error
 	uploaded := make([]UploadedObject, 0, 50)
+	var tokens = make(chan struct{}, concurrency)
 	for item := range records {
 		sw.Add(1)
-		var tokens = make(chan struct{}, 10)
 		go func(item utils.FileInfoType) {
 			defer sw.Done()
 			fPath := item.Path
@@ -52,7 +60,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 				// fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
 			}
-			if shouldSkip(item, objectKey, i) {
+			if shouldSkip(item, objectKey, uploadOptions.I) {
 				// fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
 				uploadedMutex.Lock()
 				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, Incremental: true, FileInfoType: item})
@@ -100,7 +108,7 @@ func UploadRetry(errs []error, times int) ([]UploadedObject, []error) {
 				}
 			}
 		}()
-		return UploadObjects(config.Folder, config.Bucket, records, nil)
+		return UploadObjects(config.Folder, config.Bucket, records, UploadOptions{Concurrency: 20})
 	}
 	for i := 0; i < times; i++ {
 		if len(errs) == 0 {
