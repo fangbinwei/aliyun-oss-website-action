@@ -27,9 +27,9 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	var uploadedMutex sync.Mutex
 	var errs []error
 	uploaded := make([]UploadedObject, 0, 20)
+	var tokens = make(chan struct{}, 30)
 	for item := range records {
 		sw.Add(1)
-		var tokens = make(chan struct{}, 10)
 		go func(item utils.FileInfoType) {
 			defer sw.Done()
 			fPath := item.Path
