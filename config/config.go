@@ -21,7 +21,7 @@ var (
 	Client          *oss.Client
 	Bucket          *oss.Bucket
 	SkipSetting     bool
-	IsIncremental     bool
+	IsIncremental   bool
 
 	IndexPage         string
 	NotFoundPage      string
@@ -60,7 +60,7 @@ func init() {
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\n",
 		HTMLCacheControl, ImageCacheControl, OtherCacheControl)
 
-	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret, oss.UseCname(IsCname))
+	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret, oss.UseCname(IsCname), oss.Timeout(60, 90))
 	if err != nil {
 		utils.HandleError(err)
 	}
