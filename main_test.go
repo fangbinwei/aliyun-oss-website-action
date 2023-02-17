@@ -127,6 +127,8 @@ func testUploadIncrementalFirst(t *testing.T) {
 		cacheControl := props.Get("Cache-Control")
 		if utils.IsImage(u.ObjectKey) {
 			assert.Equal(config.ImageCacheControl, cacheControl)
+		} else if utils.IsPDF(u.ObjectKey) {
+			assert.Equal(config.PDFCacheControl, cacheControl)
 		} else if utils.IsHTML(u.ObjectKey) {
 			assert.Equal(config.HTMLCacheControl, cacheControl)
 		} else {

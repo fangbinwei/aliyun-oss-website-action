@@ -86,6 +86,8 @@ func getCacheControlOption(item *utils.FileInfoType) oss.Option {
 		// pic name may not contains hash, so use different strategy
 		// 10 days
 		value = config.ImageCacheControl
+	} else if utils.IsPDF(filename) {
+		value = config.PDFCacheControl
 	} else {
 		// static assets like .js .css, use contentHash in file name, so html can update these files.
 		// 30 days

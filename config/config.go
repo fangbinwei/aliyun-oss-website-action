@@ -21,13 +21,14 @@ var (
 	Client          *oss.Client
 	Bucket          *oss.Bucket
 	SkipSetting     bool
-	IsIncremental     bool
+	IsIncremental   bool
 
 	IndexPage         string
 	NotFoundPage      string
 	HTMLCacheControl  string
 	ImageCacheControl string
 	OtherCacheControl string
+	PDFCacheControl   string
 )
 
 func init() {
@@ -49,6 +50,7 @@ func init() {
 	HTMLCacheControl = utils.Getenv("HTML_CACHE_CONTROL", "no-cache")
 	ImageCacheControl = utils.Getenv("IMAGE_CACHE_CONTROL", "max-age=864000")
 	OtherCacheControl = utils.Getenv("OTHER_CACHE_CONTROL", "max-age=2592000")
+	PDFCacheControl = utils.Getenv("PDF_CACHE_CONTROL", "max-age=2592000")
 
 	currentPath, err := os.Getwd()
 	if err != nil {
@@ -57,8 +59,8 @@ func init() {
 	fmt.Printf("current directory: %s\n", currentPath)
 	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
 		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
-	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\n",
-		HTMLCacheControl, ImageCacheControl, OtherCacheControl)
+	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\npdfCacheControl: %s\n",
+		HTMLCacheControl, ImageCacheControl, OtherCacheControl, PDFCacheControl)
 
 	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret, oss.UseCname(IsCname))
 	if err != nil {
