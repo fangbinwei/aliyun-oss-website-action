@@ -10,6 +10,11 @@ func IsHTML(filename string) bool {
 	return strings.HasSuffix(strings.ToLower(filename), ".html")
 }
 
+// IsPDF is used to determine if a file is PDF
+func IsPDF(filename string) bool {
+	return strings.HasSuffix(strings.ToLower(filename), ".pdf")
+}
+
 // IsImage is used to determine if a file is image
 func IsImage(filename string) bool {
 	imageExts := []string{
