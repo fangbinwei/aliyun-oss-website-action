@@ -34,6 +34,11 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			defer sw.Done()
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
+			prefix := config.Prefix + "/"
+			if len(config.Prefix) == 0 {
+				prefix = ""
+			}
+			objectKey = prefix + objectKey
 			options := getHTTPHeader(&item)
 
 			if shouldExclude(objectKey) {

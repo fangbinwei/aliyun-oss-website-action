@@ -15,6 +15,7 @@ var (
 	AccessKeyID     string
 	AccessKeySecret string
 	Folder          string
+	Prefix          string
 	Exclude         []string
 	BucketName      string
 	IsCname         bool
@@ -40,6 +41,7 @@ func init() {
 	AccessKeyID = os.Getenv("ACCESS_KEY_ID")
 	AccessKeySecret = os.Getenv("ACCESS_KEY_SECRET")
 	Folder = os.Getenv("FOLDER")
+	Prefix = os.Getenv("PREFIX")
 	Exclude = utils.GetActionInputAsSlice(os.Getenv("EXCLUDE"))
 	BucketName = os.Getenv("BUCKET")
 	SkipSetting = os.Getenv("SKIP_SETTING") == "true"
@@ -57,6 +59,7 @@ func init() {
 		fmt.Println(err)
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
+	fmt.Printf("push to directory: %s\n", Prefix)
 	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
 		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\npdfCacheControl: %s\n",
