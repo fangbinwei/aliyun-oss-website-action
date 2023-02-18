@@ -3,6 +3,7 @@ name: deploy test
 on:
 # 支持手动触发
   workflow_dispatch:
+  pull_request:
   push:
     branches:
       - 'master'
