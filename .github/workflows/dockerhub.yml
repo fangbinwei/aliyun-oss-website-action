@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'ci_update'
 
 jobs:
   docker:
@@ -36,4 +37,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: fangbinwei/aliyun-oss-website-action:${{ github.event.inputs.tag}}
+          tags: "fangbinwei/aliyun-oss-website-action:${{ github.event.inputs.tag}}"
