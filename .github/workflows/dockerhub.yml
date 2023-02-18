@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        default: "latest"
+        default: 'latest'
         description: dockerhub tag
   push:
     branches:
@@ -36,4 +36,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: fangbinwei/aliyun-oss-website-action:${{ github.event.inputs.tag}}
+          tags: ${{ format('fangbinwei/aliyun-oss-website-action:{0}', github.event.inputs.tag || 'latest') }}
