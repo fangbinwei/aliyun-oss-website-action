@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        default: "latest"
+        default: 'latest'
         description: dockerhub tag
   push:
     branches:
