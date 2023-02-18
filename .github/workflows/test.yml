@@ -54,6 +54,7 @@ jobs:
           htmlCacheControl: no-cache
           imageCacheControl: max-age=864001
           otherCacheControl: max-age=2592001
+          pdfCacheControl: no-cache
           skipSetting: false
           # not support recursive pattern **
           exclude: |
