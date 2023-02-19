@@ -7,8 +7,9 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 ## 概览
 - 在阿里云OSS创建一个存放网站的bucket
 - 准备一个域名, 可能需要备案(bucket选择非大陆区域, 可以不备案, 但是如果CDN加速区域包括大陆, 仍然需要备案)
-- 在你的网站repo中, 配置github action, action 触发则增量上传网站repo生成的资源文件到bucket中
+- 在你的网站repo中, 配置github action, action 触发则**增量上传**网站repo生成的资源文件到bucket中
 - 通过阿里云OSS的CDN, 可以很方便地加速网站的访问, 支持HTTPS
+> 阿里云HTTPS免费证书停止自动续签, 但是可以自己[申请免费的证书](https://help.aliyun.com/document_detail/156645.htm), 具体解决方案参考[该公告](https://help.aliyun.com/document_detail/479351.html)
 
 ## Usage
 
@@ -36,6 +37,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
 - `htmlCacheControl`: 默认`no-cache`
 - `imageCacheControl`: 默认`max-age=864000`
+- `pdfCacheControl`: 默认`max-age=2592000`
 - `otherCacheControl`: 默认`max-age=2592000`
 - `exclude`: 不上传`folder`下的某些文件/文件夹
 - `cname`: 默认`false`. 若`endpoint`填写自定义域名/bucket域名, 需设置为`true`. (使用CDN的场景下, 不推荐使用自定义域名)
