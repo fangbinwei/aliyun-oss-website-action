@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'dev'
 
 jobs:
   build:
@@ -42,13 +43,13 @@ jobs:
     - run: yarn install
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@master
+      uses: fangbinwei/aliyun-oss-website-action@dev
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
           bucket: fangbinwei-blog
-          endpoint: b.fangbinwei.cn
-          cname: true
+          endpoint: oss-cn-shanghai.aliyuncs.com
+          cname: false
           # folder in /github/workspace
           folder: .vuepress/dist
           htmlCacheControl: no-cache

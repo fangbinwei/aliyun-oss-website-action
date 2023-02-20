@@ -5,6 +5,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"time"
 
 	"aliyun-oss-website-action/config"
 	"aliyun-oss-website-action/utils"
@@ -17,17 +18,36 @@ type UploadedObject struct {
 	Incremental bool
 	utils.FileInfoType
 }
+type UploadError struct {
+	detail    utils.FileInfoType
+	objectKey string
+	fPath     string
+	msg       string
+	rawError  error
+}
+type UploadOptions struct {
+	I           *IncrementalConfig
+	Concurrency int
+}
+
+func (e *UploadError) Error() string {
+	return fmt.Sprintf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", e.objectKey, e.fPath, e.msg)
+}
 
 // UploadObjects upload files to OSS
-func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, i *IncrementalConfig) ([]UploadedObject, []error) {
+func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, uploadOptions UploadOptions) ([]UploadedObject, []error) {
 	root = path.Clean(root) + "/"
+	concurrency := uploadOptions.Concurrency
+	if concurrency <= 0 {
+		concurrency = 30
+	}
 
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
 	var uploadedMutex sync.Mutex
 	var errs []error
-	uploaded := make([]UploadedObject, 0, 20)
-	var tokens = make(chan struct{}, 30)
+	uploaded := make([]UploadedObject, 0, 50)
+	var tokens = make(chan struct{}, concurrency)
 	for item := range records {
 		sw.Add(1)
 		go func(item utils.FileInfoType) {
@@ -37,11 +57,11 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			options := getHTTPHeader(&item)
 
 			if shouldExclude(objectKey) {
-				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
+				// fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
 				return
 			}
-			if shouldSkip(item, objectKey, i) {
-				fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
+			if shouldSkip(item, objectKey, uploadOptions.I) {
+				// fmt.Printf("[SKIP] objectKey: %s \n\n", objectKey)
 				uploadedMutex.Lock()
 				uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, Incremental: true, FileInfoType: item})
 				uploadedMutex.Unlock()
@@ -53,11 +73,12 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			<-tokens
 			if err != nil {
 				errorMutex.Lock()
-				errs = append(errs, fmt.Errorf("[FAILED] objectKey: %s\nfilePath: %s\nDetail: %v", objectKey, fPath, err))
+				uErr := &UploadError{detail: item, fPath: fPath, objectKey: objectKey, rawError: err, msg: err.Error()}
+				errs = append(errs, uErr)
 				errorMutex.Unlock()
 				return
 			}
-			fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
+			// fmt.Printf("objectKey: %s\nfilePath: %s\n\n", objectKey, fPath)
 			uploadedMutex.Lock()
 			uploaded = append(uploaded, UploadedObject{ObjectKey: objectKey, FileInfoType: item})
 			uploadedMutex.Unlock()
@@ -68,6 +89,55 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 		return uploaded, errs
 	}
 	return uploaded, nil
+}
+
+func UploadRetry(errs []error, times int) ([]UploadedObject, []error) {
+	if len(errs) == 0 {
+		return []UploadedObject{}, nil
+	}
+	uploadedResult := make([]UploadedObject, 0, 50)
+
+	retry := func(e []error) ([]UploadedObject, []error) {
+		time.Sleep(time.Second * 3)
+		records := make(chan utils.FileInfoType, 20)
+		go func() {
+			defer close(records)
+			for _, item := range e {
+				if uploadError, ok := item.(*UploadError); ok {
+					records <- uploadError.detail
+				}
+			}
+		}()
+		return UploadObjects(config.Folder, config.Bucket, records, UploadOptions{Concurrency: 20})
+	}
+	for i := 0; i < times; i++ {
+		if len(errs) == 0 {
+			return uploadedResult, nil
+		}
+		uploaded, uploadError := retry(errs)
+		fmt.Printf("\n[RETRY %v]", i+1)
+		LogUploadedResult(uploaded, uploadError)
+		uploadedResult = append(uploadedResult, uploaded...)
+		errs = uploadError
+	}
+	return uploadedResult, errs
+}
+
+func LogUploadedResult(result []UploadedObject, errs []error) {
+	if result == nil {
+		return
+	}
+	uploadedCount := 0
+	skippedCount := 0
+
+	for _, v := range result {
+		if v.Incremental {
+			skippedCount++
+		} else {
+			uploadedCount++
+		}
+	}
+	fmt.Printf("\nuploaded %v object(s), skipped %v object(s), %v error(s).\n", uploadedCount, skippedCount, len(errs))
 }
 
 func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
