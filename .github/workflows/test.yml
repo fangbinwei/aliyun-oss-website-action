@@ -61,9 +61,6 @@ jobs:
             CNAME
             demo1/
             demo2/*.md
-<<<<<<< Updated upstream
-            demo2/*/*.md
-=======
             demo2/*/*.md
 
 
@@ -92,4 +89,3 @@ jobs:
           context: .
           push: true
           tags: fangbinwei/aliyun-oss-website-action:latest
->>>>>>> Stashed changes
