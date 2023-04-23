@@ -69,6 +69,7 @@ runs:
     ENDPOINT: ${{ inputs.endpoint }}
     CNAME: ${{ inputs.cname }}
     FOLDER: ${{ inputs.folder }}
+    ONLY_UPLOAD: ${{ inputs.onlyUpload }}
     EXCLUDE: ${{ inputs.exclude }}
     SKIP_SETTING: ${{ inputs.skipSetting }}
     INCREMENTAL: ${{ inputs.incremental }}
