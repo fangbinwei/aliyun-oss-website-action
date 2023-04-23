@@ -59,6 +59,10 @@ inputs:
     description: 'Cache-Control for other files'
     required: false
     default: 'max-age=2592000'
+  onlyUpload:
+    description: 'Only Upload Mode'
+    required: false
+    default: 'false'
 runs:
   using: 'docker'
   image: 'Dockerfile'
