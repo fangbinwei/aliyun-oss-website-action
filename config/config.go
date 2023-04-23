@@ -23,6 +23,7 @@ var (
 	Bucket          *oss.Bucket
 	SkipSetting     bool
 	IsIncremental   bool
+	IsOnlyUpload    bool
 
 	IndexPage         string
 	NotFoundPage      string
@@ -46,6 +47,7 @@ func init() {
 	BucketName = os.Getenv("BUCKET")
 	SkipSetting = os.Getenv("SKIP_SETTING") == "true"
 	IsIncremental = os.Getenv("INCREMENTAL") == "true"
+	IsOnlyUpload = os.Getenv("ONLY_UPLOAD") == "true"
 
 	IndexPage = utils.Getenv("INDEX_PAGE", "index.html")
 	NotFoundPage = utils.Getenv("NOT_FOUND_PAGE", "404.html")
@@ -57,6 +59,10 @@ func init() {
 	currentPath, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	if IsOnlyUpload {
+		fmt.Printf("Only Upload File Mode, Does not delete any files\n")
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
 	fmt.Printf("push to directory: %s\n", Prefix)

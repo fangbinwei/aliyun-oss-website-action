@@ -42,15 +42,15 @@ jobs:
     - run: yarn install
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@master
+      uses: jeffreys-cat/aliyun-oss-website-action@master
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
-          bucket: fangbinwei-blog
-          endpoint: b.fangbinwei.cn
+          bucket: ${{ secrets.BUCKET }}
+          endpoint: ${{ secrets.ENDPOINT }}
           cname: true
           # folder in /github/workspace
-          folder: .vuepress/dist
+          folder: /testdata
           htmlCacheControl: no-cache
           imageCacheControl: max-age=864001
           otherCacheControl: max-age=2592001
@@ -61,4 +61,35 @@ jobs:
             CNAME
             demo1/
             demo2/*.md
+<<<<<<< Updated upstream
             demo2/*/*.md
+=======
+            demo2/*/*.md
+
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: fangbinwei/aliyun-oss-website-action:latest
+>>>>>>> Stashed changes

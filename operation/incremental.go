@@ -1,6 +1,7 @@
 package operation
 
 import (
+	"aliyun-oss-website-action/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,16 @@ import (
 )
 
 const INCREMENTAL_CONFIG = ".actioninfo"
+
+func getIncremental_config_path() string {
+	var path = INCREMENTAL_CONFIG
+	if config.Prefix != "" {
+		path = config.Prefix + "/" + INCREMENTAL_CONFIG
+	}
+	return path
+}
+
+var INCREMENTAL_CONFIG_PATH = getIncremental_config_path()
 
 type IncrementalConfig struct {
 	sync.RWMutex
@@ -63,19 +74,20 @@ func UploadIncrementalConfig(bucket *oss.Bucket, records []UploadedObject) error
 	options := []oss.Option{
 		oss.ObjectACL(oss.ACLPrivate),
 	}
-	err = bucket.PutObject(INCREMENTAL_CONFIG, bytes.NewReader(j), options...)
+	err = bucket.PutObject(INCREMENTAL_CONFIG_PATH, bytes.NewReader(j), options...)
 	if err != nil {
+		fmt.Printf(INCREMENTAL_CONFIG_PATH)
 		fmt.Printf("Failed to upload incremental info: %v\n", err)
 		return err
 	}
 
-	fmt.Printf("Update & Upload incremental info: %s\n", INCREMENTAL_CONFIG)
+	fmt.Printf("Update & Upload incremental info: %s\n", INCREMENTAL_CONFIG_PATH)
 	return nil
 }
 
 func GetRemoteIncrementalConfig(bucket *oss.Bucket) (*IncrementalConfig, error) {
 	c := new(bytes.Buffer)
-	body, err := bucket.GetObject(INCREMENTAL_CONFIG)
+	body, err := bucket.GetObject(INCREMENTAL_CONFIG_PATH)
 	if err != nil {
 		fmt.Printf("Failed to get remote incremental info: %v\n", err)
 		return nil, err
@@ -88,7 +100,7 @@ func GetRemoteIncrementalConfig(bucket *oss.Bucket) (*IncrementalConfig, error) 
 		fmt.Printf("Failed to parse remote incremental info: %v\n", err)
 		return nil, err
 	}
-	fmt.Printf("Get remote incremental info: %s\n", INCREMENTAL_CONFIG)
+	fmt.Printf("Get remote incremental info: %s\n", INCREMENTAL_CONFIG_PATH)
 
 	return i, nil
 }
