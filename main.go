@@ -11,6 +11,10 @@ import (
 
 func main() {
 	defer utils.TimeCost()()
+	if config.Folder == "/" {
+		fmt.Println("You should not upload the root directory, use ./ instead. 通常来说, 你不应该上传根目录, 也许你是要配置 ./")
+		os.Exit(1)
+	}
 
 	if !config.SkipSetting {
 		operation.SetStaticWebsiteConfig()
