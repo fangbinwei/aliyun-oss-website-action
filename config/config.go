@@ -15,6 +15,7 @@ var (
 	AccessKeyID     string
 	AccessKeySecret string
 	Folder          string
+	Prefix          string
 	Exclude         []string
 	BucketName      string
 	IsCname         bool
@@ -22,6 +23,7 @@ var (
 	Bucket          *oss.Bucket
 	SkipSetting     bool
 	IsIncremental   bool
+	IsOnlyUpload    bool
 
 	IndexPage         string
 	NotFoundPage      string
@@ -40,10 +42,12 @@ func init() {
 	AccessKeyID = os.Getenv("ACCESS_KEY_ID")
 	AccessKeySecret = os.Getenv("ACCESS_KEY_SECRET")
 	Folder = os.Getenv("FOLDER")
+	Prefix = os.Getenv("PREFIX")
 	Exclude = utils.GetActionInputAsSlice(os.Getenv("EXCLUDE"))
 	BucketName = os.Getenv("BUCKET")
 	SkipSetting = os.Getenv("SKIP_SETTING") == "true"
 	IsIncremental = os.Getenv("INCREMENTAL") == "true"
+	IsOnlyUpload = os.Getenv("ONLY_UPLOAD") == "true"
 
 	IndexPage = utils.Getenv("INDEX_PAGE", "index.html")
 	NotFoundPage = utils.Getenv("NOT_FOUND_PAGE", "404.html")
@@ -56,7 +60,12 @@ func init() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	if IsOnlyUpload {
+		fmt.Printf("Only Upload File Mode, Does not delete any files\n")
+	}
 	fmt.Printf("current directory: %s\n", currentPath)
+	fmt.Printf("push to directory: %s\n", Prefix)
 	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
 		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\npdfCacheControl: %s\n",
