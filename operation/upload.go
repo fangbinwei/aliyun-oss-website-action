@@ -2,6 +2,7 @@ package operation
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -20,7 +21,12 @@ type UploadedObject struct {
 
 // UploadObjects upload files to OSS
 func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInfoType, i *IncrementalConfig) ([]UploadedObject, []error) {
-	root = path.Clean(root) + "/"
+	if root == "/" {
+		fmt.Println("You should not upload the root directory, use ./ instead. 通常来说, 你不应该上传根目录, 也许你是要配置 ./")
+		os.Exit(1)
+	} else {
+		root = path.Clean(root) + "/"
+	}
 
 	var sw sync.WaitGroup
 	var errorMutex sync.Mutex
