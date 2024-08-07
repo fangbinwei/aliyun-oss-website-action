@@ -50,7 +50,7 @@ jobs:
           endpoint: b.fangbinwei.cn
           cname: true
           # folder in /github/workspace
-          folder: .vuepress/dist
+          folder: /
           htmlCacheControl: no-cache
           imageCacheControl: max-age=864001
           otherCacheControl: max-age=2592001
