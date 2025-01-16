@@ -8,7 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	// "github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/stretchr/testify/assert"
 )
 

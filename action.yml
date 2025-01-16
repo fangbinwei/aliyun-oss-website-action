@@ -28,7 +28,7 @@ inputs:
     required: false
     default: 'false'
   skipSetting:
-    description: '`true` to skip setting static pages related configuration. `indexPage`, `notFoundPage` will not be used.'
+    description: '`true` to skip setting static pages related configuration. `indexPage`, `notFoundPage` , `errorDocumentHTTPCode` will not be used.'
     required: false
     default: 'false'
   incremental:
@@ -43,6 +43,10 @@ inputs:
     description: 'not found page'
     required: false
     default: '404.html'
+  errorDocumentHTTPCode:
+    description: 'error document HTTP code'
+    required: false
+    default: '404'
   htmlCacheControl:
     description: 'Cache-Control for HTML'
     required: false
@@ -74,9 +78,8 @@ runs:
     INCREMENTAL: ${{ inputs.incremental }}
     INDEX_PAGE: ${{ inputs.indexPage }}
     NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
+    ERROR_DOCUMENT_HTTP_CODE: ${{ inputs.errorDocumentHTTPCode }}
     HTML_CACHE_CONTROL: ${{ inputs.htmlCacheControl }}
     IMAGE_CACHE_CONTROL: ${{ inputs.imageCacheControl }}
     OTHER_CACHE_CONTROL: ${{ inputs.otherCacheControl }}
     PDF_CACHE_CONTROL: ${{ inputs.pdfCacheControl }}
-
-    

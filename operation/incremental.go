@@ -7,7 +7,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	// "github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 const INCREMENTAL_CONFIG = ".actioninfo"

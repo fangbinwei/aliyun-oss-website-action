@@ -6,7 +6,8 @@ import (
 
 	"aliyun-oss-website-action/utils"
 
-	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	// "github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 const maxKeys = 100

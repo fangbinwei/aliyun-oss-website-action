@@ -6,7 +6,8 @@ import (
 
 	"aliyun-oss-website-action/utils"
 
-	"github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	// "github.com/fangbinwei/aliyun-oss-go-sdk/oss"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/joho/godotenv"
 )
 
@@ -23,12 +24,13 @@ var (
 	SkipSetting     bool
 	IsIncremental   bool
 
-	IndexPage         string
-	NotFoundPage      string
-	HTMLCacheControl  string
-	ImageCacheControl string
-	OtherCacheControl string
-	PDFCacheControl   string
+	IndexPage             string
+	NotFoundPage          string
+	ErrorDocumentHTTPCode string
+	HTMLCacheControl      string
+	ImageCacheControl     string
+	OtherCacheControl     string
+	PDFCacheControl       string
 )
 
 func init() {
@@ -47,6 +49,7 @@ func init() {
 
 	IndexPage = utils.Getenv("INDEX_PAGE", "index.html")
 	NotFoundPage = utils.Getenv("NOT_FOUND_PAGE", "404.html")
+	ErrorDocumentHTTPCode = utils.Getenv("ERROR_DOCUMENT_HTTP_CODE", "404")
 	HTMLCacheControl = utils.Getenv("HTML_CACHE_CONTROL", "no-cache")
 	ImageCacheControl = utils.Getenv("IMAGE_CACHE_CONTROL", "max-age=864000")
 	OtherCacheControl = utils.Getenv("OTHER_CACHE_CONTROL", "max-age=2592000")
@@ -57,8 +60,8 @@ func init() {
 		fmt.Println(err)
 	}
 	fmt.Printf("current directory: %s\n", currentPath)
-	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
-		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
+	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nErrorDocumentHTTPCode: %s\nisCname: %t\nskipSetting: %t\n",
+		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, ErrorDocumentHTTPCode, IsCname, SkipSetting)
 	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\npdfCacheControl: %s\n",
 		HTMLCacheControl, ImageCacheControl, OtherCacheControl, PDFCacheControl)
 

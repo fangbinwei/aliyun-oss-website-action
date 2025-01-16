@@ -33,6 +33,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `bucket`: **必填**,部署网站的bucket, 用于存放网站的资源
 - `indexPage`: 默认`index.html`.网站首页(用于[静态页面配置](#静态页面配置))
 - `notFoundPage`: 默认`404.html`.网站404页面(用于[静态页面配置](#静态页面配置))
+- `errorDocumentHTTPCode`: 默认`404`.错误页面返回HTTP Code(用于[静态页面配置](#静态页面配置))
 - `incremental`: 默认`true`. 使用增量上传.
 - `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
 - `htmlCacheControl`: 默认`no-cache`
@@ -167,6 +168,7 @@ jobs:
           cname: true
           folder: dist
           notFoundPage: index.html
+          errorDocumentHTTPCode: '404'
           htmlCacheControl: no-cache
           imageCacheControl: max-age=864001
           otherCacheControl: max-age=2592001
