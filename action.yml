@@ -43,22 +43,10 @@ inputs:
     description: 'not found page'
     required: false
     default: '404.html'
-  htmlCacheControl:
-    description: 'Cache-Control for HTML'
+  headers:
+    description: 'Headers for the files'
     required: false
-    default: 'no-cache'
-  imageCacheControl:
-    description: 'Cache-Control for image'
-    required: false
-    default: 'max-age=864000'
-  pdfCacheControl: 
-    description: 'Cache-Control for PDF'
-    required: false
-    default: 'max-age=2592000'
-  otherCacheControl:
-    description: 'Cache-Control for other files'
-    required: false
-    default: 'max-age=2592000'
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -74,9 +62,4 @@ runs:
     INCREMENTAL: ${{ inputs.incremental }}
     INDEX_PAGE: ${{ inputs.indexPage }}
     NOT_FOUND_PAGE: ${{ inputs.notFoundPage }}
-    HTML_CACHE_CONTROL: ${{ inputs.htmlCacheControl }}
-    IMAGE_CACHE_CONTROL: ${{ inputs.imageCacheControl }}
-    OTHER_CACHE_CONTROL: ${{ inputs.otherCacheControl }}
-    PDF_CACHE_CONTROL: ${{ inputs.pdfCacheControl }}
-
-    
+    HEADERS: ${{ inputs.headers }}

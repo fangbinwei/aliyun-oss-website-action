@@ -12,6 +12,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var headersForTest = []utils.HeadersConfig{
+	{
+		Path: "\\.html",
+		Headers: map[string]string{
+			"Cache-Control": "public, max-age=0, must-revalidate",
+		},
+	},
+	{
+		Path: "\\.(jpg|png|gif|webp|ico)$",
+		Headers: map[string]string{
+			"Cache-Control": "max-age=31536000",
+		},
+	},
+	{
+		Path: "\\.pdf$",
+		Headers: map[string]string{
+			"Cache-Control": "max-age=11536000",
+		},
+	},
+	{
+		Path: "",
+		Headers: map[string]string{
+			"Cache-Control": "no-cache",
+		},
+	},
+}
+
 func testSetStaticWebsiteConfig(t *testing.T) {
 	assert := assert.New(t)
 
@@ -20,6 +47,7 @@ func testSetStaticWebsiteConfig(t *testing.T) {
 }
 
 func testUpload(t *testing.T) {
+	config.Headers = headersForTest
 	assert := assert.New(t)
 	fmt.Println("---- [delete] ---->")
 	errs := operation.DeleteObjects(config.Bucket)
@@ -54,19 +82,13 @@ func testUpload(t *testing.T) {
 		// 避开方法: env中endpoint使用bucket的endpoint或者bucket域名, 而不是自定义域名
 		props, err := config.Bucket.GetObjectDetailedMeta(u.ObjectKey)
 		assert.NoError(err)
-		cacheControl := props.Get("Cache-Control")
-		if utils.IsImage(u.ObjectKey) {
-			assert.Equal(config.ImageCacheControl, cacheControl)
-		} else if utils.IsHTML(u.ObjectKey) {
-			assert.Equal(config.HTMLCacheControl, cacheControl)
-		} else {
-			assert.Equal(config.OtherCacheControl, cacheControl)
-		}
+		headers := utils.MatchHeadersConfig(u.ObjectKey, config.Headers)
+		assert.Equal(headers["Cache-Control"], props.Get("Cache-Control"))
 	}
-
 }
 
 func testUploadIncrementalFirst(t *testing.T) {
+	config.Headers = headersForTest
 	assert := assert.New(t)
 
 	fmt.Println("---- [incremental] ---->")
@@ -110,7 +132,7 @@ func testUploadIncrementalFirst(t *testing.T) {
 	for _, v := range uploaded {
 		assert.False(v.Incremental)
 		assert.Equal(v.ContentMD5, incremental.M[v.ObjectKey].ContentMD5)
-		assert.Equal(v.CacheControl, incremental.M[v.ObjectKey].CacheControl)
+		assert.Equal(v.HeadersMD5, incremental.M[v.ObjectKey].HeadersMD5)
 	}
 
 	// test exclude
@@ -124,16 +146,8 @@ func testUploadIncrementalFirst(t *testing.T) {
 		// 避开方法: env中endpoint使用bucket的endpoint或者bucket域名, 而不是自定义域名
 		props, err := config.Bucket.GetObjectDetailedMeta(u.ObjectKey)
 		assert.NoError(err)
-		cacheControl := props.Get("Cache-Control")
-		if utils.IsImage(u.ObjectKey) {
-			assert.Equal(config.ImageCacheControl, cacheControl)
-		} else if utils.IsPDF(u.ObjectKey) {
-			assert.Equal(config.PDFCacheControl, cacheControl)
-		} else if utils.IsHTML(u.ObjectKey) {
-			assert.Equal(config.HTMLCacheControl, cacheControl)
-		} else {
-			assert.Equal(config.OtherCacheControl, cacheControl)
-		}
+		headers := utils.MatchHeadersConfig(u.ObjectKey, config.Headers)
+		assert.Equal(headers["Cache-Control"], props.Get("Cache-Control"))
 	}
 }
 
@@ -187,7 +201,7 @@ func testUploadIncrementalSecond(t *testing.T) {
 		// 全都不需要上传, 命中incremental
 		assert.True(v.Incremental)
 		assert.Equal(v.ContentMD5, incremental.M[v.ObjectKey].ContentMD5)
-		assert.Equal(v.CacheControl, incremental.M[v.ObjectKey].CacheControl)
+		assert.Equal(v.HeadersMD5, incremental.M[v.ObjectKey].HeadersMD5)
 	}
 
 }
@@ -196,7 +210,16 @@ func testUploadIncrementalThird(t *testing.T) {
 	assert := assert.New(t)
 	folder := "testdata/group2"
 	// 改变cache-control会让对应文件重新上传, 即使hash没变
-	config.ImageCacheControl = "no-cache"
+	// 我们可以勇敢在config.Headers开头添加一个针对ico文件的cache-control来实现上述操作
+	config.Headers = headersForTest
+	config.Headers = append([]utils.HeadersConfig{
+		{
+			Path: "\\.ico$",
+			Headers: map[string]string{
+				"Cache-Control": "max-age=114514191",
+			},
+		},
+	}, config.Headers...)
 
 	fmt.Println("---- [incremental] ---->")
 	incremental, err := operation.GetRemoteIncrementalConfig(config.Bucket)
@@ -251,7 +274,7 @@ func testUploadIncrementalThird(t *testing.T) {
 	assert.Equal(len(uploaded), len(incremental.M))
 	for _, v := range uploaded {
 		assert.Equal(v.ContentMD5, incremental.M[v.ObjectKey].ContentMD5)
-		assert.Equal(v.CacheControl, incremental.M[v.ObjectKey].CacheControl)
+		assert.Equal(v.HeadersMD5, incremental.M[v.ObjectKey].HeadersMD5)
 	}
 
 }

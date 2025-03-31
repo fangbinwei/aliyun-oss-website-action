@@ -40,7 +40,7 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 			defer sw.Done()
 			fPath := item.Path
 			objectKey := strings.TrimPrefix(item.PathOSS, root)
-			options := getHTTPHeader(&item)
+			options := getHTTPHeader("/"+objectKey, &item)
 
 			if shouldExclude(objectKey) {
 				fmt.Printf("[EXCLUDE] objectKey: %s\n\n", objectKey)
@@ -76,38 +76,21 @@ func UploadObjects(root string, bucket *oss.Bucket, records <-chan utils.FileInf
 	return uploaded, nil
 }
 
-func getHTTPHeader(item *utils.FileInfoType) []oss.Option {
-	return []oss.Option{
-		getCacheControlOption(item),
+func getHTTPHeader(path string, item *utils.FileInfoType) (option []oss.Option) {
+	headersConfig := utils.MatchHeadersConfig(path, config.Headers)
+	for k, v := range headersConfig {
+		option = append(option, oss.SetHeader(k, v))
 	}
-}
-
-func getCacheControlOption(item *utils.FileInfoType) oss.Option {
-	var value string
-	filename := item.Name
-
-	if utils.IsHTML(filename) {
-		value = config.HTMLCacheControl
-	} else if utils.IsImage(filename) {
-		// pic name may not contains hash, so use different strategy
-		// 10 days
-		value = config.ImageCacheControl
-	} else if utils.IsPDF(filename) {
-		value = config.PDFCacheControl
-	} else {
-		// static assets like .js .css, use contentHash in file name, so html can update these files.
-		// 30 days
-		value = config.OtherCacheControl
+	headersMD5, err := utils.GetHeadersConfigMD5(headersConfig)
+	if err != nil {
+		fmt.Printf("Failed to get headers config MD5: %v\n", err)
 	}
-	item.CacheControl = value
-	return oss.CacheControl(value)
+	item.HeadersMD5 = headersMD5
+	return
 }
 
 func shouldExclude(objectKey string) bool {
-	if utils.Match(config.Exclude, objectKey) {
-		return true
-	}
-	return false
+	return utils.Match(config.Exclude, objectKey)
 }
 
 func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig) bool {
@@ -124,7 +107,7 @@ func shouldSkip(item utils.FileInfoType, objectKey string, i *IncrementalConfig)
 	i.Lock()
 	delete(i.M, objectKey)
 	i.Unlock()
-	if item.ValidHash && item.ContentMD5 == remoteConfig.ContentMD5 && item.CacheControl == remoteConfig.CacheControl {
+	if item.ValidHash && item.ContentMD5 == remoteConfig.ContentMD5 && item.HeadersMD5 == remoteConfig.HeadersMD5 {
 		return true
 	}
 	return false

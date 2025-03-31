@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -23,17 +24,14 @@ var (
 	SkipSetting     bool
 	IsIncremental   bool
 
-	IndexPage         string
-	NotFoundPage      string
-	HTMLCacheControl  string
-	ImageCacheControl string
-	OtherCacheControl string
-	PDFCacheControl   string
+	IndexPage    string
+	NotFoundPage string
+	Headers      []utils.HeadersConfig
 )
 
 func init() {
-	godotenv.Load(".env")
 	godotenv.Load(".env.local")
+	godotenv.Load(".env")
 
 	Endpoint = os.Getenv("ENDPOINT")
 	IsCname = os.Getenv("CNAME") == "true"
@@ -47,10 +45,15 @@ func init() {
 
 	IndexPage = utils.Getenv("INDEX_PAGE", "index.html")
 	NotFoundPage = utils.Getenv("NOT_FOUND_PAGE", "404.html")
-	HTMLCacheControl = utils.Getenv("HTML_CACHE_CONTROL", "no-cache")
-	ImageCacheControl = utils.Getenv("IMAGE_CACHE_CONTROL", "max-age=864000")
-	OtherCacheControl = utils.Getenv("OTHER_CACHE_CONTROL", "max-age=2592000")
-	PDFCacheControl = utils.Getenv("PDF_CACHE_CONTROL", "max-age=2592000")
+
+	headersEnv := utils.Getenv("HEADERS", utils.DEFAULT_HEADERS_CONFIG)
+	Headers = []utils.HeadersConfig{}
+	if headersEnv != "" {
+		err := json.Unmarshal([]byte(headersEnv), &Headers)
+		if err != nil {
+			utils.HandleError(fmt.Errorf("failed to unmarshal HEADERS: %w", err))
+		}
+	}
 
 	currentPath, err := os.Getwd()
 	if err != nil {
@@ -59,8 +62,7 @@ func init() {
 	fmt.Printf("current directory: %s\n", currentPath)
 	fmt.Printf("endpoint: %s\nbucketName: %s\nfolder: %s\nincremental: %t\nexclude: %v\nindexPage: %s\nnotFoundPage: %s\nisCname: %t\nskipSetting: %t\n",
 		Endpoint, BucketName, Folder, IsIncremental, Exclude, IndexPage, NotFoundPage, IsCname, SkipSetting)
-	fmt.Printf("HTMLCacheControl: %s\nimageCacheControl: %s\notherCacheControl: %s\npdfCacheControl: %s\n",
-		HTMLCacheControl, ImageCacheControl, OtherCacheControl, PDFCacheControl)
+	fmt.Printf("headers: %s\n", headersEnv)
 
 	Client, err = oss.New(Endpoint, AccessKeyID, AccessKeySecret, oss.UseCname(IsCname))
 	if err != nil {

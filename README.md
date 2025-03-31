@@ -15,7 +15,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 
 ```yml
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@v2
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
@@ -35,10 +35,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 - `notFoundPage`: 默认`404.html`.网站404页面(用于[静态页面配置](#静态页面配置))
 - `incremental`: 默认`true`. 使用增量上传.
 - `skipSetting`: 默认`false`, 是否跳过设置[静态页面配置](#静态页面配置)
-- `htmlCacheControl`: 默认`no-cache`
-- `imageCacheControl`: 默认`max-age=864000`
-- `pdfCacheControl`: 默认`max-age=2592000`
-- `otherCacheControl`: 默认`max-age=2592000`
+- `headers`: 默认`{"path": "\\.html$", "headers": {"Cache-Control": "public, max-age=0, must-revalidate"}}`
 - `exclude`: 不上传`folder`下的某些文件/文件夹
 - `cname`: 默认`false`. 若`endpoint`填写自定义域名/bucket域名, 需设置为`true`. (使用CDN的场景下, 不推荐使用自定义域名)
 
@@ -56,13 +53,33 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 
 > **计划未来优化这个步骤, 优化后, 先上传新的文件到OSS中, 再diff删除多余的文件.** 
 
-## Cache-Control
-为上传的资源默认设置的`Cache-Control`如下
-|资源类型 | Cache-Control|
-|----| ----|
-|.html|no-cache|
-|.png/jpg...(图片资源)|max-age=864000(10days)|
-|other|max-age=2592000(30days)|
+## HTTP Headers
+
+由于 Github Actions 不支持传入数组作为配置, 所以只能穿入 json 字符串:
+- **key**: 支持正则表达式的文件路径
+- **headers**: HTT头配置
+
+```yml
+    - name: upload files to OSS
+      uses: fangbinwei/aliyun-oss-website-action@v2
+      with:
+        accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
+        accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
+        bucket: your-bucket-name
+        endpoint: oss-cn-shanghai.aliyuncs.com
+        folder: your-website-output-folder
+        headers: |
+          [
+            {
+              "path": "\\.html$",
+              "headers": { "Cache-Control": "public, max-age=0, must-revalidate" }
+            },
+            {
+              "path": "^/public/",
+              "headers": { "Cache-Control": "max-age=31536000, immutable" }
+            }
+          ]
+```
 
 ## 静态页面配置
 默认的, action会将阿里云OSS的静态页面配置成如下
@@ -76,7 +93,7 @@ deploy website on aliyun OSS(Alibaba Cloud OSS)
 
 ```yml
     - name: exclude some files
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@v2
       with:
         folder: dist
         exclude: |
@@ -142,7 +159,7 @@ jobs:
     # 打包文档命令
     - run: yarn docs:build
     - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@v2
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}
@@ -158,7 +175,7 @@ jobs:
 
 ```yml
 - name: upload files to OSS
-      uses: fangbinwei/aliyun-oss-website-action@v1
+      uses: fangbinwei/aliyun-oss-website-action@v2
       with:
           accessKeyId: ${{ secrets.ACCESS_KEY_ID }}
           accessKeySecret: ${{ secrets.ACCESS_KEY_SECRET }}

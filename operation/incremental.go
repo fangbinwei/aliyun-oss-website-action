@@ -15,8 +15,8 @@ const INCREMENTAL_CONFIG = ".actioninfo"
 type IncrementalConfig struct {
 	sync.RWMutex
 	M map[string]struct {
-		ContentMD5   string
-		CacheControl string
+		ContentMD5 string
+		HeadersMD5 string
 	}
 }
 
@@ -33,19 +33,19 @@ func (i *IncrementalConfig) parse(raw []byte) error {
 func generateIncrementalConfig(uploaded []UploadedObject) ([]byte, error) {
 	i := new(IncrementalConfig)
 	i.M = make(map[string]struct {
-		ContentMD5   string
-		CacheControl string
+		ContentMD5 string
+		HeadersMD5 string
 	})
 	for _, u := range uploaded {
 		if !u.ValidHash {
 			continue
 		}
 		i.M[u.ObjectKey] = struct {
-			ContentMD5   string
-			CacheControl string
+			ContentMD5 string
+			HeadersMD5 string
 		}{
-			ContentMD5:   u.ContentMD5,
-			CacheControl: u.CacheControl,
+			ContentMD5: u.ContentMD5,
+			HeadersMD5: u.HeadersMD5,
 		}
 	}
 	j, err := i.stringify()

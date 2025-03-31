@@ -12,13 +12,13 @@ var sema = make(chan struct{}, 20)
 
 // FileInfoType is a type which contains dir and os.FileInfo
 type FileInfoType struct {
-	Dir          string
-	Path         string
-	PathOSS      string
-	Name         string
-	CacheControl string // Complete 'CacheControl' when uploading files
-	ContentMD5   string
-	ValidHash    bool // if ContentMD5 is valid
+	Dir        string
+	Path       string
+	PathOSS    string
+	Name       string
+	HeadersMD5 string // MD5 for oss headers
+	ContentMD5 string
+	ValidHash  bool // if ContentMD5 is valid
 }
 
 // WalkDir get sub files of target dir
@@ -46,7 +46,7 @@ func walkDir(dir string, sw *sync.WaitGroup, fileInfos chan<- FileInfoType) {
 			go walkDir(subdir, sw, fileInfos)
 		} else {
 			p := filepath.Join(dir, entryName)
-			contentMD5, _ := HashMD5(p)
+			contentMD5, _ := HashMD5ForFile(p)
 			fileInfos <- FileInfoType{
 				ValidHash:  contentMD5 != "",
 				ContentMD5: contentMD5,
